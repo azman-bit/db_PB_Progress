@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>e-PB Monitor – JPPKK TVET</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;background:#f0f2f5;color:#1f2328;font-size:13px;line-height:1.5;min-height:100vh}
+
+/* ══ SCREENS ══ */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ══ LANDING ══ */
+#screenLanding{background:#f0f2f5}
+.lhdr{background:#1a3a5c;color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.lhdr h1{font-size:18px;font-weight:700}.lhdr p{font-size:11px;color:#a8c4de;margin-top:2px}
+.lhdr-btns{display:flex;gap:8px}
+.btn-lo{background:#0e9f6e;color:#fff;border:none;padding:8px 18px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-lo:hover{background:#0b8a5e}
+.btn-lo-out{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5);padding:7px 16px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-lo-out:hover{background:rgba(255,255,255,.12);border-color:#fff}
+
+.hero{background:linear-gradient(135deg,#1a3a5c 0%,#2563a8 100%);color:#fff;padding:36px 28px 44px;text-align:center}
+.hero h2{font-size:26px;font-weight:700;margin-bottom:6px}
+.hero p{font-size:13px;color:#bfdbfe;max-width:520px;margin:0 auto 24px}
+.hero-kpi{display:flex;justify-content:center;gap:28px;flex-wrap:wrap}
+.hkpi{text-align:center}.hkpi-v{font-size:30px;font-weight:700;line-height:1}.hkpi-l{font-size:11px;color:#93c5fd;margin-top:3px}
+
+.lbody{max-width:1200px;margin:0 auto;padding:24px 20px;flex:1}
+.sec-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#57606a;margin-bottom:12px;margin-top:20px}
+
+/* overview cards */
+.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px}
+.ovc{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:14px 16px;position:relative;overflow:hidden}
+.ovc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:9px 9px 0 0}
+.ovc.cb::before{background:#3b82f6}.ovc.cg::before{background:#0e9f6e}
+.ovc.cy::before{background:#f59e0b}.ovc.cr::before{background:#ef4444}
+.ovc-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:#57606a}
+.ovc-val{font-size:26px;font-weight:700;line-height:1.1;margin-top:3px}
+.ovc.cb .ovc-val{color:#3b82f6}.ovc.cg .ovc-val{color:#0e9f6e}
+.ovc.cy .ovc-val{color:#f59e0b}.ovc.cr .ovc-val{color:#ef4444}
+.ovc-sub{font-size:11px;color:#57606a;margin-top:4px}
+
+/* charts */
+.charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:4px}
+.cc{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:16px 18px}
+.cc-t{font-size:12px;font-weight:600;margin-bottom:2px}
+.cc-s{font-size:11px;color:#57606a;margin-bottom:12px}
+.cc-wrap{position:relative;height:190px}
+
+/* item progress */
+.ipt{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:16px 18px;margin-bottom:4px}
+.ipr{display:grid;grid-template-columns:170px 1fr 70px 70px 70px;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6}
+.ipr:last-child{border-bottom:none}
+.ipr.ipr-hdr{padding-bottom:5px;border-bottom:2px solid #e5e7eb}
+.ipr-lbl{font-size:10px;font-weight:600;color:#57606a;text-transform:uppercase;letter-spacing:.4px}
+.ipr-name{font-size:12px;font-weight:600}.ipr-due{font-size:10px;color:#57606a}
+.sbar{height:9px;border-radius:99px;background:#f3f4f6;overflow:hidden;display:flex}
+.ss{height:100%;transition:width .5s}
+.ss-s{background:#0e9f6e}.ss-l{background:#f59e0b}.ss-m{background:#ef4444}
+.cc2{font-size:10px;font-weight:700;padding:2px 6px;border-radius:99px;text-align:center}
+.cc2-s{background:#d1fae5;color:#065f46}.cc2-l{background:#fef3c7;color:#92400e}.cc2-m{background:#fee2e2;color:#991b1b}
+
+/* CTA */
+.cta-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:4px}
+.ctac{border-radius:10px;padding:20px 24px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;border:none;font-family:inherit;text-align:left;width:100%}
+.ctac:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.ctac.cl{background:linear-gradient(135deg,#1a3a5c,#2563a8);color:#fff}
+.ctac.cs{background:linear-gradient(135deg,#065f46,#0e9f6e);color:#fff}
+.ctac-icon{font-size:32px;flex-shrink:0}
+.ctac-text h3{font-size:14px;font-weight:700;margin-bottom:3px}
+.ctac-text p{font-size:11px;opacity:.85}
+.ctac-arr{margin-left:auto;font-size:18px;opacity:.7}
+
+.lfooter{text-align:center;padding:14px;font-size:11px;color:#57606a;border-top:1px solid #e5e7eb;background:#fff;margin-top:auto}
+
+/* ══ LOGIN MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none}
+.login-box{background:#fff;border-radius:14px;padding:28px 32px;width:100%;max-width:390px;box-shadow:0 24px 80px rgba(0,0,0,.3);position:relative}
+.lb-title{font-size:17px;font-weight:700;color:#1a3a5c;margin-bottom:3px}
+.lb-sub{font-size:12px;color:#57606a;margin-bottom:18px}
+.rtabs{display:flex;background:#f0f2f5;border-radius:7px;padding:3px;margin-bottom:16px;gap:3px}
+.rtab{flex:1;padding:7px;text-align:center;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;color:#57606a;transition:all .15s;user-select:none}
+.rtab.active{background:#fff;color:#1a3a5c;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.ff{margin-bottom:12px}
+.ff label{display:block;font-size:11px;font-weight:600;color:#57606a;margin-bottom:4px}
+.ff input{width:100%;padding:8px 11px;border:1.5px solid #e5e7eb;border-radius:7px;font-size:13px;outline:none;font-family:inherit;transition:border .15s}
+.ff input:focus{border-color:#1a3a5c;box-shadow:0 0 0 3px rgba(26,58,92,.1)}
+.lo-btn{width:100%;padding:10px;background:#1a3a5c;color:#fff;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;margin-top:2px}
+.lo-btn:hover{background:#15325a}
+.lo-err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:6px;padding:7px 11px;font-size:11px;margin-top:8px;display:none;text-align:center}
+.lo-err.show{display:block}
+.lo-hint{background:#f0f7ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;font-size:11px;color:#1e40af;margin-top:12px;line-height:1.8}
+.lo-hint strong{display:block;margin-bottom:2px;font-size:11px}
+.lo-hint code{background:#dbeafe;padding:1px 5px;border-radius:3px;font-family:monospace}
+.lo-close{position:absolute;top:10px;right:12px;font-size:18px;cursor:pointer;color:#57606a;background:none;border:none;line-height:1}
+
+/* ══ APP ══ */
+#screenApp{background:#f0f2f5}
+.ahdr{background:#1a3a5c;color:#fff;padding:11px 24px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ahdr-l h1{font-size:16px;font-weight:700}.ahdr-l p{font-size:10px;color:#a8c4de;margin-top:1px}
+.ahdr-r{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.uchip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);border-radius:18px;padding:4px 11px 4px 5px}
+.uav{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+.uav-l{background:#0e9f6e}.uav-s{background:#7c5cd8}
+.uchip-n{font-size:11px;font-weight:600;color:#fff}.uchip-r{font-size:10px;color:#a8c4de}
+.abtn{background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.25);padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s}
+.abtn:hover{background:rgba(255,255,255,.25)}
+.abtn.ag{background:#0e9f6e;border-color:#0e9f6e}.abtn.ag:hover{background:#0b8a5e}
+
+/* Session/Course selector bar */
+.sel-bar{background:#fff;border-bottom:1px solid #e5e7eb;padding:10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sel-bar label{font-size:11px;font-weight:600;color:#57606a;white-space:nowrap}
+.sel-bar select{padding:5px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;outline:none;font-family:inherit;cursor:pointer;background:#fff;color:#1f2328}
+.sel-bar select:focus{border-color:#3b82f6}
+.sel-divider{width:1px;height:20px;background:#e5e7eb}
+.course-pill{display:flex;gap:6px;flex-wrap:wrap}
+.cpill{padding:5px 13px;border-radius:18px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid #e5e7eb;color:#57606a;background:#fff;transition:all .15s;white-space:nowrap}
+.cpill:hover{border-color:#1a3a5c;color:#1a3a5c}
+.cpill.active{background:#1a3a5c;color:#fff;border-color:#1a3a5c}
+
+/* App tabs */
+.atabs{display:flex;background:#fff;border-bottom:2px solid #e5e7eb;padding:0 24px}
+.atab{padding:9px 16px;cursor:pointer;font-size:12px;font-weight:500;color:#57606a;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.atab.active{color:#1a3a5c;border-bottom-color:#1a3a5c;font-weight:600}
+.atab:hover:not(.active){color:#1a3a5c;background:#f7f8fa}
+
+.abody{max-width:1280px;margin:0 auto;padding:18px 20px}
+.apage{display:none}.apage.active{display:block}
+
+/* ── Stats ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.sc{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:14px 16px;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:9px 9px 0 0}
+.sc.sg::before{background:#0e9f6e}.sc.sr::before{background:#ef4444}
+.sc.sy::before{background:#f59e0b}.sc.sb::before{background:#3b82f6}
+.sc-lbl{font-size:10px;color:#57606a;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.sc-val{font-size:26px;font-weight:700;margin-top:3px;line-height:1}
+.sc.sg .sc-val{color:#0e9f6e}.sc.sr .sc-val{color:#ef4444}
+.sc.sy .sc-val{color:#f59e0b}.sc.sb .sc-val{color:#3b82f6}
+.sc-sub{font-size:11px;color:#57606a;margin-top:4px}
+
+/* ── Dashboard charts row ── */
+.dash-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.dash-chart-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px}
+.panel{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:16px 18px}
+.panel-title{font-size:12px;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.panel-sub{font-size:11px;color:#57606a;margin-bottom:12px}
+.panel-wrap{position:relative;height:180px}
+
+/* ── Alert panel ── */
+.alert-panel{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:14px 16px;margin-bottom:18px}
+.alrt-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.alrt-title{font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px}
+.adot{width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.alrt-list{display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto}
+.ai{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:6px;border:1px solid}
+.ai.miss{background:#fef2f2;border-color:#fecaca}
+.ai.late{background:#fffbeb;border-color:#fde68a}
+.ai.risk{background:#fff7ed;border-color:#fed7aa}
+.ai-ico{font-size:13px;flex-shrink:0}
+.ai-name{font-weight:600;font-size:11px}
+.ai-desc{font-size:10px;color:#57606a}
+.ai-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;flex-shrink:0}
+.ai.miss .ai-badge{background:#fee2e2;color:#991b1b}
+.ai.late .ai-badge{background:#fef3c7;color:#92400e}
+.ai.risk .ai-badge{background:#ffedd5;color:#9a3412}
+
+/* ── CQI Panel ── */
+.cqi-panel{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:16px 18px;margin-bottom:18px}
+.cqi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:10px}
+.cqi-card{border:1px solid #e5e7eb;border-radius:8px;padding:12px 14px}
+.cqi-card-name{font-size:12px;font-weight:600;margin-bottom:8px}
+.cqi-sub-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.cqi-sub-name{font-size:11px;flex:1;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cqi-mini-bar{flex:1;height:6px;background:#f3f4f6;border-radius:99px;overflow:hidden;min-width:40px}
+.cqi-mini-fill{height:6px;border-radius:99px}
+.cqi-pct{font-size:10px;font-weight:600;width:30px;text-align:right;flex-shrink:0}
+
+/* ── Grid ── */
+.grid-wrapper{background:#fff;border:1px solid #e5e7eb;border-radius:9px;overflow:hidden;margin-bottom:18px}
+.gtoolbar{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb;gap:8px;flex-wrap:wrap}
+.gtoolbar-title{font-size:12px;font-weight:600}
+.tright{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.fbtn{padding:4px 10px;border-radius:5px;border:1px solid #e5e7eb;background:#fff;font-size:11px;cursor:pointer;font-weight:500;color:#57606a;transition:all .15s}
+.fbtn.active,.fbtn:hover{background:#1a3a5c;color:#fff;border-color:#1a3a5c}
+.srch{padding:5px 9px;border:1px solid #e5e7eb;border-radius:5px;font-size:11px;width:140px;outline:none}
+.srch:focus{border-color:#3b82f6;box-shadow:0 0 0 2px #dbeafe}
+.tscroll{overflow-x:auto}
+table.mg{width:100%;border-collapse:collapse;min-width:600px}
+table.mg th{background:#f8fafc;font-size:10px;font-weight:600;color:#57606a;text-transform:uppercase;letter-spacing:.3px;padding:7px 9px;border-bottom:2px solid #e5e7eb;white-space:nowrap;text-align:center}
+table.mg th.tl{text-align:left}
+table.mg td{padding:7px 9px;border-bottom:1px solid #f3f4f6;vertical-align:middle;text-align:center;font-size:12px}
+table.mg tr:last-child td{border-bottom:none}
+table.mg tr:hover td{background:#f7f8fa}
+.sn{text-align:left;font-weight:500;white-space:nowrap;font-size:12px}
+.sid{font-size:10px;color:#57606a}
+.chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.chip.ck{cursor:pointer;transition:filter .15s}.chip.ck:hover{filter:brightness(.9)}
+.chip.sub{background:#d1fae5;color:#065f46}
+.chip.lat{background:#fef3c7;color:#92400e}
+.chip.mis{background:#fee2e2;color:#991b1b}
+.pw{background:#f3f4f6;border-radius:99px;height:5px;min-width:60px}
+.pf{height:5px;border-radius:99px;transition:width .3s}
+.pl{font-size:10px;color:#57606a;margin-top:1px;text-align:center}
+.score-val{font-weight:700;font-size:12px}
+.sv-h{color:#0e9f6e}.sv-m{color:#f59e0b}.sv-l{color:#ef4444}
+tr.myrow td{background:#f0f7ff!important}
+tr.myrow td:first-child{border-left:3px solid #3b82f6!important}
+
+/* Grade chip */
+.gchip{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:5px;min-width:28px;text-align:center}
+.g-A  {background:#d1fae5;color:#065f46}
+.g-Am {background:#d1fae5;color:#065f46}
+.g-Bp {background:#dbeafe;color:#1e40af}
+.g-B  {background:#dbeafe;color:#1e40af}
+.g-Bm {background:#e0e7ff;color:#3730a3}
+.g-Cp {background:#fef3c7;color:#92400e}
+.g-C  {background:#fef3c7;color:#92400e}
+.g-Cm {background:#ffedd5;color:#9a3412}
+.g-D  {background:#fee2e2;color:#991b1b}
+.g-E  {background:#fecaca;color:#7f1d1d}
+.g-F  {background:#f3f4f6;color:#6b7280}
+
+/* ── Markah modal ── */
+.mmodal{background:#fff;border-radius:12px;padding:22px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.mmodal h3{font-size:15px;font-weight:700;margin-bottom:3px}
+.mmodal .msub{font-size:11px;color:#57606a;margin-bottom:14px}
+.sub-items-table{width:100%;border-collapse:collapse;margin-bottom:14px}
+.sub-items-table th{background:#f8fafc;font-size:10px;font-weight:600;color:#57606a;padding:6px 8px;text-align:left;border-bottom:1px solid #e5e7eb}
+.sub-items-table td{padding:7px 8px;border-bottom:1px solid #f3f4f6;font-size:12px;vertical-align:middle}
+.sub-items-table tr:last-child td{border-bottom:none}
+.markah-input{width:60px;padding:4px 7px;border:1px solid #e5e7eb;border-radius:5px;font-size:12px;text-align:center;outline:none;font-family:inherit}
+.markah-input:focus{border-color:#3b82f6;box-shadow:0 0 0 2px #dbeafe}
+.markah-max{font-size:11px;color:#57606a}
+.markah-pct{font-size:11px;font-weight:600;color:#1a3a5c;min-width:36px;text-align:right}
+.markah-summary{background:#f7f8fa;border-radius:7px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.ms-item{text-align:center}
+.ms-label{font-size:10px;color:#57606a;margin-bottom:2px}
+.ms-value{font-size:18px;font-weight:700;color:#1a3a5c}
+
+/* ── Status modal ── */
+.smodal{background:#fff;border-radius:12px;padding:22px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.smodal h3{font-size:15px;font-weight:700;margin-bottom:3px}
+.smodal .ssub{font-size:11px;color:#57606a;margin-bottom:14px}
+.mchips{display:flex;gap:8px;justify-content:center;margin:12px 0;flex-wrap:wrap}
+.mchip{padding:8px 16px;border-radius:7px;border:2px solid #e5e7eb;cursor:pointer;font-weight:600;font-size:12px;transition:all .15s}
+.mchip.sub{border-color:#0e9f6e;color:#0e9f6e}.mchip.sub.sel,.mchip.sub:hover{background:#0e9f6e;color:#fff}
+.mchip.lat{border-color:#f59e0b;color:#92400e}.mchip.lat.sel,.mchip.lat:hover{background:#f59e0b;color:#fff}
+.mchip.mis{border-color:#ef4444;color:#991b1b}.mchip.mis.sel,.mchip.mis:hover{background:#ef4444;color:#fff}
+.modal-actions{display:flex;gap:7px;justify-content:flex-end;margin-top:12px}
+
+/* ── Item PB cards ── */
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:18px}
+.icard{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:12px 14px}
+.icard-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:7px}
+.icard-name{font-size:12px;font-weight:600}
+.icard-w{font-size:10px;font-weight:700;background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:99px}
+.ibar-wrap{background:#f3f4f6;border-radius:3px;height:7px;margin-bottom:5px}
+.ibar-fill{height:7px;border-radius:3px;transition:width .4s}
+.icard-stats{display:flex;justify-content:space-between;font-size:10px;color:#57606a}
+.icard-due{font-size:10px;color:#57606a;margin-top:5px}
+.icard-due span{font-weight:500;color:#1f2328}
+
+/* ── Setup ── */
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.setup-card{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:18px}
+.setup-card h3{font-size:13px;font-weight:600;margin-bottom:14px}
+.fg{margin-bottom:10px}
+.fg label{display:block;font-size:11px;font-weight:600;color:#57606a;margin-bottom:3px}
+.fi{width:100%;padding:7px 9px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;outline:none;font-family:inherit}
+.fi:focus{border-color:#3b82f6;box-shadow:0 0 0 2px #dbeafe}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{padding:6px 14px;border-radius:6px;border:none;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn-p{background:#1a3a5c;color:#fff}.btn-p:hover{background:#15325a}
+.btn-g{background:#0e9f6e;color:#fff}.btn-g:hover{background:#0b8a5e}
+.btn-d{background:#ef4444;color:#fff;padding:4px 9px}.btn-d:hover{background:#dc2626}
+.btn-sm{padding:3px 8px;font-size:10px}
+
+/* PB Item editor with sub-items */
+.pb-item-block{border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;overflow:hidden}
+.pb-item-hdr{background:#f8fafc;padding:8px 12px;display:grid;grid-template-columns:1fr 70px 110px auto;gap:8px;align-items:center;border-bottom:1px solid #e5e7eb}
+.pb-item-hdr input{font-size:12px}
+.pb-sub-list{padding:8px 12px}
+.pb-sub-row{display:grid;grid-template-columns:1fr 70px auto;gap:6px;align-items:center;margin-bottom:6px}
+.pb-sub-row:last-child{margin-bottom:0}
+.pb-sub-row input{font-size:11px}
+.add-sub-btn{font-size:10px;color:#3b82f6;background:none;border:none;cursor:pointer;padding:2px 0;font-family:inherit;display:flex;align-items:center;gap:3px;margin-top:4px}
+.add-sub-btn:hover{color:#1d4ed8}
+.wt-total{font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;text-align:right;margin-top:6px}
+.wt-ok{background:#d1fae5;color:#065f46}.wt-warn{background:#fef3c7;color:#92400e}.wt-err{background:#fee2e2;color:#991b1b}
+
+.sl-edit{display:flex;flex-direction:column;gap:5px;max-height:300px;overflow-y:auto}
+.sl-row{display:flex;gap:5px;align-items:center}
+.sl-row input{flex:1;font-size:11px}
+
+/* ── GPA Summary Panel ── */
+.gpa-panel{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.gpa-block{text-align:center;min-width:70px}
+.gpa-val{font-size:26px;font-weight:700;line-height:1;color:#1a3a5c}
+.gpa-lbl{font-size:10px;color:#57606a;margin-top:3px}
+.gpa-divider{width:1px;height:44px;background:#e5e7eb;flex-shrink:0}
+.gpa-courses{flex:1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gpa-course-pill{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid #e5e7eb;background:#f7f8fa;color:#374151}
+.gpa-course-pill .gpc-g{font-weight:700;margin-left:5px}
+
+/* ── Student CQI Modal ── */
+.scqi-modal{background:#fff;border-radius:12px;padding:22px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:85vh;overflow-y:auto}
+.scqi-modal h3{font-size:15px;font-weight:700;margin-bottom:3px}
+.scqi-modal .ssub{font-size:11px;color:#57606a;margin-bottom:14px}
+.scqi-item{margin-bottom:14px}
+.scqi-item-hdr{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid #f3f4f6}
+.scqi-item-name{font-size:12px;font-weight:600;flex:1}
+.scqi-item-avg{font-size:11px;color:#57606a}
+
+/* ── Student: My Courses & Upload ── */
+.my-courses-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:18px}
+.mccard{background:#fff;border:1px solid #e5e7eb;border-radius:9px;overflow:hidden;cursor:pointer;transition:all .15s}
+.mccard:hover{border-color:#1a3a5c;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.mccard-hdr{background:linear-gradient(135deg,#1a3a5c,#2563a8);color:#fff;padding:14px 16px}
+.mccard-code{font-size:11px;font-weight:600;opacity:.8}
+.mccard-name{font-size:14px;font-weight:700;margin-top:2px}
+.mccard-lec{font-size:11px;opacity:.75;margin-top:3px}
+.mccard-body{padding:12px 16px}
+.mccard-stats{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.mcs{text-align:center;flex:1}
+.mcs-v{font-size:18px;font-weight:700;line-height:1}
+.mcs-l{font-size:10px;color:#57606a;margin-top:2px}
+.mcs.cg .mcs-v{color:#0e9f6e}.mcs.cy .mcs-v{color:#f59e0b}.mcs.cr .mcs-v{color:#ef4444}
+.mccard-prog{background:#f3f4f6;border-radius:99px;height:5px;margin-bottom:6px}
+.mccard-prog-fill{height:5px;border-radius:99px;transition:width .3s}
+.mccard-grade{font-size:11px;font-weight:600;text-align:right}
+
+/* Student course detail */
+.stu-course-header{background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.sch-info h2{font-size:15px;font-weight:700;color:#1a3a5c}
+.sch-info p{font-size:11px;color:#57606a;margin-top:2px}
+.sch-score{text-align:right}
+.sch-score-val{font-size:22px;font-weight:700;color:#1a3a5c}
+.sch-score-grade{font-size:11px;color:#57606a;margin-top:1px}
+
+.sub-panel{background:#fff;border:1px solid #e5e7eb;border-radius:9px;overflow:hidden;margin-bottom:14px}
+.sub-panel-hdr{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between}
+.sub-panel-title{font-size:13px;font-weight:600}
+.sub-item-block{border-bottom:1px solid #f3f4f6}
+.sub-item-block:last-child{border-bottom:none}
+.sib-hdr{padding:10px 16px;display:flex;align-items:center;gap:10px;background:#fafafa;flex-wrap:wrap}
+.sib-name{font-weight:600;font-size:12px;flex:1}
+.sib-weight{font-size:10px;background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:99px;font-weight:700}
+.sib-status{flex-shrink:0}
+.sib-markah{font-size:11px;color:#374151;flex-shrink:0}
+.sub-entry-row{padding:10px 16px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.upload-zone{border:2px dashed #d1d5db;border-radius:7px;padding:9px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;min-width:180px;flex:1;max-width:300px;background:#fafafa;position:relative}
+.upload-zone:hover,.upload-zone.drag{border-color:#3b82f6;background:#eff6ff}
+.upload-zone.hf{border-color:#0e9f6e;background:#f0fdf4}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uz-icon{font-size:18px;flex-shrink:0}
+.uz-txt strong{display:block;font-size:11px;font-weight:600;color:#374151}
+.uz-txt span{font-size:10px;color:#57606a}
+.upload-btn{padding:7px 14px;background:#1a3a5c;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s;flex-shrink:0}
+.upload-btn:hover{background:#15325a}
+.upload-btn:disabled{background:#9ca3af;cursor:not-allowed}
+.done-info{font-size:11px;color:#0e9f6e;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:5px 9px;display:flex;align-items:center;gap:5px;min-width:180px;flex:1;max-width:300px}
+.reup-btn{font-size:10px;color:#57606a;background:none;border:1px solid #d1d5db;border-radius:4px;padding:2px 6px;cursor:pointer;margin-left:auto;font-family:inherit}
+.reup-btn:hover{background:#f3f4f6}
+.cancel-up-btn{font-size:11px;font-weight:600;color:#57606a;background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;padding:6px 12px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;transition:all .15s}
+.cancel-up-btn:hover{background:#e5e7eb}
+.markah-chip{background:#f0f7ff;border:1px solid #bfdbfe;border-radius:6px;padding:5px 10px;font-size:11px;color:#1e40af;font-weight:600;white-space:nowrap}
+
+/* Print modal */
+.pmodal{background:#fff;border-radius:12px;padding:22px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.pmodal h3{font-size:15px;font-weight:700;margin-bottom:5px}
+.pmodal p{font-size:11px;color:#57606a;margin-bottom:12px}
+.popts{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.popt{display:flex;align-items:flex-start;gap:8px;padding:9px 12px;border:2px solid #e5e7eb;border-radius:7px;cursor:pointer;transition:all .15s}
+.popt:hover{border-color:#1a3a5c;background:#f7f8fa}
+.popt.sel{border-color:#1a3a5c;background:#eff6ff}
+.popt input[type=checkbox]{margin-top:1px;accent-color:#1a3a5c;width:13px;height:13px;flex-shrink:0}
+.popt-txt strong{display:block;font-size:12px;font-weight:600}
+.popt-txt span{font-size:10px;color:#57606a}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:#1a3a5c;color:#fff;padding:10px 18px;border-radius:9px;font-size:12px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.25);z-index:500;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.t-ok{background:#0e9f6e}.t-warn{background:#f59e0b;color:#1f2328}.t-err{background:#ef4444}
+
+/* Print */
+@media print{
+  body{background:#fff!important;font-size:10px}
+  #screenLanding,.ahdr,.sel-bar,.atabs,.gtoolbar,.fbtn,.srch,.modal-overlay,.toast,.no-print{display:none!important}
+  .apage{display:block!important}
+  .abody{padding:0!important;max-width:100%!important}
+  .sc,.grid-wrapper,.alert-panel,.icard,.setup-card,.panel,.cqi-panel{border:1px solid #ccc!important;border-radius:3px!important;break-inside:avoid}
+  .stats-row{grid-template-columns:repeat(4,1fr)!important}
+  .chip,.gchip{border:1px solid #ccc!important;background:transparent!important;color:#000!important}
+  table.mg th,table.mg td{padding:3px 5px!important;font-size:9px!important}
+  .pf,.sc::before{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .phb{display:block!important}
+  h2.pts{display:block!important;font-size:13px;font-weight:700;margin:14px 0 7px;border-bottom:2px solid #1a3a5c;padding-bottom:3px;color:#1a3a5c}
+  body.pno-al .alert-panel{display:none!important}
+  body.pno-gr .grid-wrapper{display:none!important}
+  body.pno-st .stats-row{display:none!important}
+  body.pno-it .item-grid{display:none!important}
+}
+.phb{display:none;margin-bottom:18px;padding-bottom:10px;border-bottom:2px solid #1a3a5c}
+.phb h2{font-size:17px;font-weight:700;color:#1a3a5c}
+.phb-meta{display:flex;gap:16px;margin-top:5px;font-size:10px;color:#57606a;flex-wrap:wrap}
+h2.pts{display:none}
+
+@media(max-width:900px){
+  .ov-grid,.charts-row,.dash-chart-3{grid-template-columns:1fr 1fr}
+  .cta-row,.setup-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .ov-grid,.stats-row{grid-template-columns:1fr 1fr}
+  .charts-row,.dash-charts,.dash-chart-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     SCREEN: LANDING
+═══════════════════════════════ -->
+<div id="screenLanding" class="screen active">
+  <div class="lhdr">
+    <div><h1>📊 e-PB Monitor</h1><p>Sistem Pemantauan Penilaian Berterusan · JPPKK TVET</p></div>
+    <div class="lhdr-btns">
+      <button class="btn-lo-out" onclick="openLogin('student')">🎓 Log Masuk Pelajar</button>
+      <button class="btn-lo"     onclick="openLogin('lecturer')">👨‍🏫 Log Masuk Pensyarah</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <h2>Status Penghantaran Penilaian Berterusan</h2>
+    <p>Statistik submission pelajar secara real-time bagi sesi pengajian semasa</p>
+    <div class="hero-kpi" id="heroKpi"></div>
+  </div>
+
+  <div class="lbody">
+    <div class="sec-lbl">Ringkasan Sesi Semasa</div>
+    <div class="ov-grid" id="landingOv"></div>
+
+    <div class="sec-lbl">Visualisasi Submission</div>
+    <div class="charts-row">
+      <div class="cc"><div class="cc-t">Status Keseluruhan</div><div class="cc-s">Agihan submission semua pelajar</div><div class="cc-wrap"><canvas id="cPie"></canvas></div></div>
+      <div class="cc"><div class="cc-t">Submission Rate Per Item PB</div><div class="cc-s">% pelajar yang sudah submit</div><div class="cc-wrap"><canvas id="cBar"></canvas></div></div>
+      <div class="cc"><div class="cc-t">Taburan Submission Pelajar</div><div class="cc-s">Bilangan item dihantar setiap pelajar</div><div class="cc-wrap"><canvas id="cDist"></canvas></div></div>
+    </div>
+
+    <div class="sec-lbl">Pecahan Status Setiap Item PB</div>
+    <div class="ipt"><div class="ipr ipr-hdr"><span class="ipr-lbl">Item PB</span><span class="ipr-lbl">Progress Submission</span><span class="ipr-lbl" style="text-align:center">✅</span><span class="ipr-lbl" style="text-align:center">⚠️</span><span class="ipr-lbl" style="text-align:center">❌</span></div><div id="iprRows"></div></div>
+
+    <div class="sec-lbl">Akses Sistem</div>
+    <div class="cta-row">
+      <button class="ctac cl" onclick="openLogin('lecturer')"><span class="ctac-icon">👨‍🏫</span><div class="ctac-text"><h3>Log Masuk Pensyarah</h3><p>Akses penuh — input markah, kemaskini status, setup kursus & print laporan</p></div><span class="ctac-arr">→</span></button>
+      <button class="ctac cs" onclick="openLogin('student')"><span class="ctac-icon">🎓</span><div class="ctac-text"><h3>Log Masuk Pelajar</h3><p>Semak status & markah semua kursus anda, upload tugasan tepat masa</p></div><span class="ctac-arr">→</span></button>
+    </div>
+  </div>
+  <div class="lfooter">© 2025 e-PB Monitor · Jabatan Pendidikan Politeknik &amp; Kolej Komuniti · Made with IBM Bob</div>
+</div>
+
+<!-- ═══════════════════════════════
+     SCREEN: APP
+═══════════════════════════════ -->
+<div id="screenApp" class="screen">
+  <div class="ahdr">
+    <div class="ahdr-l"><h1>📊 e-PB Monitor</h1><p id="ahdrSub">JPPKK TVET</p></div>
+    <div class="ahdr-r">
+      <span id="ahdrCourse" style="display:none;background:#2563a8;color:#fff;padding:3px 10px;border-radius:16px;font-size:11px;font-weight:600"></span>
+      <div class="uchip"><div class="uav" id="uav"></div><div><div class="uchip-n" id="uname"></div><div class="uchip-r" id="urole"></div></div></div>
+      <button class="abtn ag lecturer-only" onclick="openPrintModal()">🖨️ Print</button>
+      <button class="abtn" onclick="doLogout()">← Log Keluar</button>
+    </div>
+  </div>
+
+  <!-- Session + Course selector (lecturer only) -->
+  <div class="sel-bar lecturer-only" id="selBar">
+    <label>Sesi:</label>
+    <select id="selSesi" onchange="onSesiChange()"></select>
+    <div class="sel-divider"></div>
+    <label>Kursus:</label>
+    <div class="course-pill" id="coursePills"></div>
+  </div>
+
+  <div class="atabs" id="appTabs">
+    <div class="atab active"        onclick="switchTab('dashboard',this)">📋 Dashboard</div>
+    <div class="atab"               onclick="switchTab('items',this)">📦 Item PB</div>
+    <div class="atab lecturer-only" onclick="switchTab('setup',this)">⚙️ Setup</div>
+  </div>
+
+  <div class="abody">
+    <div class="phb" id="phb"><h2 id="phbTitle"></h2><div class="phb-meta" id="phbMeta"></div></div>
+
+    <!-- DASHBOARD -->
+    <div id="pageDashboard" class="apage active">
+      <!-- STUDENT: course cards + detail -->
+      <div id="stuCoursesView" class="student-only">
+        <div id="stuGpaPanel" class="gpa-panel" style="display:none"></div>
+        <div class="sec-lbl" id="stuSesiLabel"></div>
+        <div class="my-courses-grid" id="myCoursesGrid"></div>
+        <div id="stuCourseDetail" style="display:none"></div>
+      </div>
+
+      <!-- LECTURER: stats + alerts + grid -->
+      <h2 class="pts">Ringkasan Keseluruhan</h2>
+      <div class="stats-row lecturer-only" id="lStatsRow"></div>
+
+      <div class="dash-charts lecturer-only">
+        <div class="panel"><div class="panel-title">📊 Agihan Status Submission</div><div class="panel-sub" id="dashPieSub"></div><div class="panel-wrap"><canvas id="dashPie"></canvas></div></div>
+        <div class="panel"><div class="panel-title">📈 Submission Rate Per Item PB</div><div class="panel-sub">% pelajar yang telah submit</div><div class="panel-wrap"><canvas id="dashBar"></canvas></div></div>
+      </div>
+
+      <h2 class="pts">Alert — Perlu Perhatian</h2>
+      <div class="alert-panel lecturer-only">
+        <div class="alrt-hdr"><div class="alrt-title"><span class="adot"></span>Alert Submission</div><span style="font-size:10px;color:#57606a" id="alertCnt"></span></div>
+        <div class="alrt-list" id="alertList"></div>
+      </div>
+
+      <h2 class="pts">Senarai Submission Pelajar</h2>
+      <div class="grid-wrapper lecturer-only">
+        <div class="gtoolbar no-print">
+          <div class="gtoolbar-title">Senarai Submission Pelajar</div>
+          <div class="tright">
+            <input class="srch" type="text" placeholder="Cari pelajar…" oninput="filterStudents(this.value)"/>
+            <button class="fbtn active" onclick="setFilter('all',this)">Semua</button>
+            <button class="fbtn" onclick="setFilter('miss',this)">❌ Belum</button>
+            <button class="fbtn" onclick="setFilter('late',this)">⚠️ Lewat</button>
+            <button class="fbtn" onclick="setFilter('risk',this)">🔴 Berisiko</button>
+          </div>
+        </div>
+        <div class="tscroll"><table class="mg" id="mainGrid"></table></div>
+      </div>
+
+      <!-- CQI -->
+      <div class="cqi-panel lecturer-only">
+        <div class="panel-title">🔍 CQI — Analisis Sub-Item (Kenal Pasti Item Lemah)</div>
+        <div class="panel-sub">Purata markah pelajar bagi setiap sub-item. Item di bawah 60% memerlukan penambahbaikan.</div>
+        <div class="cqi-grid" id="cqiGrid"></div>
+      </div>
+    </div>
+
+    <!-- ITEM PB -->
+    <div id="pageItems" class="apage">
+      <h2 class="pts">Ringkasan Per Item PB</h2>
+      <div class="item-grid" id="itemGrid"></div>
+      <!-- Grade distribution -->
+      <div class="dash-chart-3 lecturer-only">
+        <div class="panel"><div class="panel-title">🎓 Taburan Gred</div><div class="panel-sub">Bilangan pelajar bagi setiap gred</div><div class="panel-wrap"><canvas id="gradeChart"></canvas></div></div>
+        <div class="panel"><div class="panel-title">📊 Markah Min Per Item</div><div class="panel-sub">Purata markah wajaran setiap item PB</div><div class="panel-wrap"><canvas id="avgChart"></canvas></div></div>
+        <div class="panel" id="gradeStatPanel"><div class="panel-title">📋 Statistik Markah Kelas</div><div class="panel-sub">Keseluruhan pencapaian PB</div><div id="gradeStats" style="margin-top:8px"></div></div>
+      </div>
+    </div>
+
+    <!-- SETUP -->
+    <div id="pageSetup" class="apage">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div><strong style="font-size:13px">⚙️ Setup Kursus</strong><div style="font-size:11px;color:#57606a;margin-top:2px" id="setupCourseLabel"></div></div>
+        <button class="btn btn-p btn-sm" onclick="showAddCourseForm()">＋ Tambah Kursus Baru</button>
+      </div>
+      <div id="addCourseForm" style="display:none;background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:16px;margin-bottom:14px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:10px">Kursus Baru</div>
+        <div class="frow" style="margin-bottom:8px">
+          <div class="fg"><label>Sesi</label><select class="fi" id="newCourseSession"></select></div>
+          <div class="fg"><label>Kod Kursus</label><input class="fi" id="newCourseCode" placeholder="cth: DCS1013"/></div>
+        </div>
+        <div class="fg"><label>Nama Kursus</label><input class="fi" id="newCourseName" placeholder="cth: Web Programming"/></div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <button class="btn btn-g btn-sm" onclick="addNewCourse()">Simpan</button>
+          <button class="btn btn-sm" style="background:#f3f4f6;color:#374151" onclick="document.getElementById('addCourseForm').style.display='none'">Batal</button>
+        </div>
+      </div>
+      <div class="setup-grid">
+        <div class="setup-card">
+          <h3>🗂️ Item Penilaian Berterusan</h3>
+          <div style="font-size:11px;color:#57606a;margin-bottom:10px">Setiap item boleh mempunyai sub-item (tugasan individu). Markah penuh setiap sub-item boleh berbeza.</div>
+          <div id="pbItemsEditor"></div>
+          <div class="wt-total" id="wtTotal"></div>
+          <button class="btn btn-sm" style="background:#f3f4f6;color:#374151;margin-top:8px;border:1px solid #e5e7eb" onclick="addPbItem()">＋ Tambah Item PB</button>
+          <br/><br/>
+          <button class="btn btn-g" onclick="savePbItems()">💾 Simpan Item PB</button>
+        </div>
+        <div class="setup-card">
+          <h3>👥 Senarai Pelajar</h3>
+          <div class="frow" style="margin-bottom:8px">
+            <div class="fg"><label>Nama</label><input class="fi" id="newStuName" placeholder="Nama pelajar"/></div>
+            <div class="fg"><label>No. Matrik</label><input class="fi" id="newStuId" placeholder="cth: D24A001"/></div>
+          </div>
+          <button class="btn btn-p btn-sm" onclick="addStudent()" style="margin-bottom:10px">＋ Tambah</button>
+          <div class="sl-edit" id="stuListEdit"></div>
+          <div style="margin-top:8px;font-size:11px;color:#57606a" id="stuCount"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LOGIN MODAL ══ -->
+<div class="modal-overlay hidden" id="loginModal">
+  <div class="login-box">
+    <button class="lo-close" onclick="closeLogin()">✕</button>
+    <div class="lb-title">Log Masuk</div>
+    <div class="lb-sub">Masukkan kelayakan anda untuk akses sistem</div>
+    <div class="rtabs">
+      <div class="rtab active" id="rtL" onclick="selRole('lecturer')">👨‍🏫 Pensyarah</div>
+      <div class="rtab"        id="rtS" onclick="selRole('student')">🎓 Pelajar</div>
+    </div>
+    <div class="ff"><label id="loIdLbl">ID Pensyarah</label><input type="text" id="loId" placeholder="cth: L001" autocomplete="username"/></div>
+    <div class="ff"><label>Kata Laluan</label><input type="password" id="loPw" placeholder="Masukkan kata laluan" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="lo-btn" onclick="doLogin()">Log Masuk →</button>
+    <div class="lo-err" id="loErr">ID atau kata laluan tidak sah.</div>
+    <div class="lo-hint"><strong>🔑 Akaun Demo</strong>Pensyarah: <code>L001</code> / <code>pensyarah123</code><br/>Pelajar: No. Matrik (cth: <code>D24A001</code>) / <code>pelajar123</code></div>
+  </div>
+</div>
+
+<!-- ══ MARKAH MODAL (Lecturer input marks) ══ -->
+<div class="modal-overlay hidden" id="markahModal">
+  <div class="mmodal">
+    <h3 id="mmTitle">Input Markah</h3>
+    <div class="msub" id="mmSub"></div>
+    <table class="sub-items-table">
+      <thead><tr><th>Sub-Item / Tugasan</th><th>Markah Dapat</th><th>Markah Penuh</th><th>%</th></tr></thead>
+      <tbody id="mmTableBody"></tbody>
+    </table>
+    <div class="markah-summary" id="mmSummary"></div>
+    <div class="modal-actions">
+      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="closeMarkahModal()">Batal</button>
+      <button class="btn btn-g" onclick="saveMarkah()">💾 Simpan Markah</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STATUS MODAL ══ -->
+<div class="modal-overlay hidden" id="statusModal">
+  <div class="smodal">
+    <h3 id="smTitle">Kemaskini Status</h3>
+    <div class="ssub" id="smSub"></div>
+    <div class="mchips">
+      <div class="mchip sub" onclick="selStatus('sub')">✅ Submitted</div>
+      <div class="mchip lat" onclick="selStatus('lat')">⚠️ Lewat</div>
+      <div class="mchip mis" onclick="selStatus('mis')">❌ Belum Hantar</div>
+    </div>
+    <label style="font-size:11px;font-weight:600;color:#57606a">Nota (pilihan)</label>
+    <textarea id="smNote" style="width:100%;padding:7px 9px;border:1px solid #e5e7eb;border-radius:6px;font-size:11px;resize:vertical;min-height:50px;font-family:inherit;outline:none;margin-top:5px" placeholder="cth: Hantar melalui emel, lewat, dll…"></textarea>
+    <div class="modal-actions">
+      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="closeStatusModal()">Batal</button>
+      <button class="btn btn-p" onclick="saveStatus()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRINT MODAL ══ -->
+<div class="modal-overlay hidden" id="printModal">
+  <div class="pmodal">
+    <h3>🖨️ Print Laporan</h3>
+    <p>Pilih bahagian yang ingin disertakan dalam laporan bercetak.</p>
+    <div class="popts">
+      <label class="popt sel" id="po-st"><input type="checkbox" checked onchange="tglP(this,'st')"/><div class="popt-txt"><strong>📊 Statistik</strong><span>Submission rate, lewat, missing, berisiko</span></div></label>
+      <label class="popt sel" id="po-al"><input type="checkbox" checked onchange="tglP(this,'al')"/><div class="popt-txt"><strong>🔔 Alert</strong><span>Senarai pelajar yang memerlukan perhatian</span></div></label>
+      <label class="popt sel" id="po-gr"><input type="checkbox" checked onchange="tglP(this,'gr')"/><div class="popt-txt"><strong>📋 Grid Submission</strong><span>Jadual lengkap status & markah semua pelajar</span></div></label>
+      <label class="popt sel" id="po-it"><input type="checkbox" checked onchange="tglP(this,'it')"/><div class="popt-txt"><strong>📦 Ringkasan Item PB</strong><span>Kadar submission & markah per item</span></div></label>
+    </div>
+    <div style="background:#f7f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:8px 12px;font-size:10px;color:#57606a;margin-bottom:12px">💡 Gunakan orientasi <strong>Landscape</strong> dan aktifkan <em>"Print Background Graphics"</em>.</div>
+    <div class="modal-actions">
+      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="closePrintModal()">Batal</button>
+      <button class="btn btn-g" onclick="doPrint()">🖨️ Print Sekarang</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDENT CQI DETAIL MODAL (also used by lecturer for per-student view) ══ -->
+<div class="modal-overlay hidden" id="scqiModal">
+  <div class="scqi-modal">
+    <h3 id="scqiTitle">Analisis Sub-Item</h3>
+    <div class="ssub" id="scqiSub"></div>
+    <div id="scqiBody"></div>
+    <div class="modal-actions" style="margin-top:14px">
+      <button class="btn" style="background:#f3f4f6;color:#374151" onclick="document.getElementById('scqiModal').classList.add('hidden')">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  CONSTANTS
+// ══════════════════════════════════════════════════════
+const GRADE_SCALE = [
+  {min:90,max:100,grade:'A',  gp:4.00,cls:'g-A'},
+  {min:80,max:89, grade:'A-', gp:3.67,cls:'g-Am'},
+  {min:75,max:79, grade:'B+', gp:3.33,cls:'g-Bp'},
+  {min:70,max:74, grade:'B',  gp:3.00,cls:'g-B'},
+  {min:65,max:69, grade:'B-', gp:2.67,cls:'g-Bm'},
+  {min:60,max:64, grade:'C+', gp:2.33,cls:'g-Cp'},
+  {min:55,max:59, grade:'C',  gp:2.00,cls:'g-C'},
+  {min:50,max:54, grade:'C-', gp:1.67,cls:'g-Cm'},
+  {min:45,max:49, grade:'D',  gp:1.33,cls:'g-D'},
+  {min:40,max:44, grade:'E',  gp:1.00,cls:'g-E'},
+  {min:0, max:39, grade:'F',  gp:0.00,cls:'g-F'},
+];
+
+const SESSIONS = ['Sesi I 2024/2025','Sesi II 2024/2025','Sesi I 2025/2026','Sesi II 2025/2026'];
+
+const LECTURERS = [
+  {id:'L001',name:'En. Ahmad Fadzli',password:'pensyarah123'},
+  {id:'L002',name:'Pn. Siti Rohani', password:'pensyarah123'},
+];
+const STUDENT_PW = 'pelajar123';
+
+// ══════════════════════════════════════════════════════
+//  DATA MODEL
+//  courses[sessionKey][courseId] = {
+//    code, name, lecturerId,
+//    pbItems: [{id,name,weight,subItems:[{id,name,maxScore}]}],
+//    students: [{id,name}],
+//    submissions: { studentId: { pbItemId: { subItemId: {status,fileName,uploadedAt,score} }}}
+//  }
+// ══════════════════════════════════════════════════════
+let db = { courses: {} };
+
+// ─── Seed demo data ───
+(function seedDemo(){
+  const sess = 'Sesi I 2024/2025';
+  const cid1 = 'DCS1013', cid2 = 'DCS2023', cid3 = 'DCS3033';
+
+  const students = [
+    {id:'D24A001',name:'Ahmad Syafiq Zulkifli'}, {id:'D24A002',name:'Nurul Ain Mohd Razif'},
+    {id:'D24A003',name:'Muhammad Haziq Roslan'}, {id:'D24A004',name:'Siti Fatimah Abdullah'},
+    {id:'D24A005',name:'Mohd Faiz Ismail'},       {id:'D24A006',name:'Nur Hazirah Hamdan'},
+    {id:'D24A007',name:'Amirul Hafiz Zainal'},    {id:'D24A008',name:'Wan Nur Izzati Wan Aziz'},
+    {id:'D24A009',name:'Khairul Anwar Daud'},     {id:'D24A010',name:'Farhana Mohd Noor'},
+    {id:'D24A011',name:'Izzuddin Yusof'},          {id:'D24A012',name:'Nur Syazwani Ahmad'},
+    {id:'D24A013',name:'Hafizuddin Zakaria'},      {id:'D24A014',name:'Nurul Hidayah Ramli'},
+    {id:'D24A015',name:'Syafiq Ikhwan Nor'},       {id:'D24A016',name:'Azween Azizi'},
+    {id:'D24A017',name:'Muhammad Aiman Ghazali'},  {id:'D24A018',name:'Nur Farzana Baharudin'},
+    {id:'D24A019',name:'Zulhilmi Othman'},          {id:'D24A020',name:'Anis Farhah Kamarudin'},
+    {id:'D24A021',name:'Ridhwan Mohd Salleh'},      {id:'D24A022',name:'Nabilah Zaharudin'},
+    {id:'D24A023',name:'Afiq Danial Sharif'},       {id:'D24A024',name:'Hazirah Md Saat'},
+    {id:'D24A025',name:'Irfan Hakimi Kadir'},       {id:'D24A026',name:'Nur Atiqah Yahya'},
+    {id:'D24A027',name:'Adam Mirza Zainudin'},      {id:'D24A028',name:'Shahirah Hussin'},
+    {id:'D24A029',name:'Muhamad Aliff Ibrahim'},    {id:'D24A030',name:'Nurul Nadia Mansor'},
+  ];
+
+  const mkCourse = (id,code,name,pbItems)=>({
+    code,name,lecturerId:'L001',
+    pbItems,
+    students:[...students],
+    submissions:{}
+  });
+
+  db.courses[sess] = {
+    [cid1]: mkCourse(cid1,'DCS1013','Web Programming',[
+      {id:'pb1',name:'Kuiz',weight:15,due:'2024-10-15',subItems:[
+        {id:'s1',name:'Kuiz 1',maxScore:10},{id:'s2',name:'Kuiz 2',maxScore:10},{id:'s3',name:'Kuiz 3',maxScore:10}]},
+      {id:'pb2',name:'Tugasan',weight:25,due:'2024-11-01',subItems:[
+        {id:'s1',name:'Tugasan 1',maxScore:50},{id:'s2',name:'Tugasan 2',maxScore:50}]},
+      {id:'pb3',name:'Projek',weight:30,due:'2024-11-25',subItems:[
+        {id:'s1',name:'Laporan',maxScore:30},{id:'s2',name:'Demo/Pembentangan',maxScore:20}]},
+      {id:'pb4',name:'Ujian',weight:30,due:'2024-12-05',subItems:[
+        {id:'s1',name:'Ujian 1',maxScore:30},{id:'s2',name:'Ujian 2',maxScore:30}]},
+    ]),
+    [cid2]: mkCourse(cid2,'DCS2023','Database System',[
+      {id:'pb1',name:'Kuiz',weight:20,due:'2024-10-20',subItems:[
+        {id:'s1',name:'Kuiz 1',maxScore:10},{id:'s2',name:'Kuiz 2',maxScore:10}]},
+      {id:'pb2',name:'Tugasan',weight:30,due:'2024-11-10',subItems:[
+        {id:'s1',name:'ERD & Normalisasi',maxScore:40},{id:'s2',name:'SQL Queries',maxScore:40}]},
+      {id:'pb3',name:'Ujian',weight:50,due:'2024-12-08',subItems:[
+        {id:'s1',name:'Ujian Amali',maxScore:50},{id:'s2',name:'Ujian Teori',maxScore:50}]},
+    ]),
+    [cid3]: mkCourse(cid3,'DCS3033','Computer Network',[
+      {id:'pb1',name:'Kuiz',weight:15,due:'2024-10-18',subItems:[
+        {id:'s1',name:'Kuiz 1',maxScore:10},{id:'s2',name:'Kuiz 2',maxScore:10}]},
+      {id:'pb2',name:'Amali',weight:25,due:'2024-11-05',subItems:[
+        {id:'s1',name:'Amali 1 – Topologi',maxScore:25},{id:'s2',name:'Amali 2 – Routing',maxScore:25}]},
+      {id:'pb3',name:'Projek',weight:30,due:'2024-11-28',subItems:[
+        {id:'s1',name:'Cadangan Rangkaian',maxScore:30},{id:'s2',name:'Pembentangan',maxScore:20}]},
+      {id:'pb4',name:'Ujian',weight:30,due:'2024-12-06',subItems:[
+        {id:'s1',name:'Ujian 1',maxScore:30},{id:'s2',name:'Ujian 2',maxScore:30}]},
+    ]),
+  };
+
+  // Also add Sesi II courses for L001
+  db.courses['Sesi II 2024/2025'] = {
+    [cid1]: mkCourse(cid1,'DCS1013','Web Programming (Sesi II)',[
+      {id:'pb1',name:'Kuiz',weight:20,due:'2025-04-10',subItems:[{id:'s1',name:'Kuiz 1',maxScore:10},{id:'s2',name:'Kuiz 2',maxScore:10}]},
+      {id:'pb2',name:'Tugasan',weight:30,due:'2025-04-28',subItems:[{id:'s1',name:'Tugasan 1',maxScore:50},{id:'s2',name:'Tugasan 2',maxScore:50}]},
+      {id:'pb3',name:'Ujian',weight:50,due:'2025-05-20',subItems:[{id:'s1',name:'Ujian 1',maxScore:50},{id:'s2',name:'Ujian 2',maxScore:50}]},
+    ]),
+  };
+
+  // Seed submissions for all courses in Sesi I
+  [cid1,cid2,cid3].forEach(cid=>{
+    const course = db.courses[sess][cid];
+    course.students.forEach((stu,si)=>{
+      course.submissions[stu.id]={};
+      course.pbItems.forEach((item,ii)=>{
+        course.submissions[stu.id][item.id]={};
+        item.subItems.forEach(sub=>{
+          let st;
+          if(si>=27)      st=ii<2?(Math.random()<.7?'missing':'lat'):'sub';
+          else if(si>=22) st=Math.random()<.3?'missing':(Math.random()<.2?'lat':'sub');
+          else            {const o=['sub','sub','sub','lat','missing'];st=o[Math.floor(Math.random()*o.length)];}
+          const ua=st==='sub'?rdDate(item.due):null;
+          const sc=st==='sub'?Math.round(Math.random()*(sub.maxScore*0.7)+sub.maxScore*0.3):null;
+          const lateSc=st==='lat'?Math.round(Math.random()*(sub.maxScore*0.5)+sub.maxScore*0.2):null;
+          course.submissions[stu.id][item.id][sub.id]={
+            status:st, fileName:st!=='missing'?`${sub.name.replace(/\s/g,'_')}_${stu.id}.pdf`:null,
+            uploadedAt:ua, score:st==='sub'?sc:st==='lat'?lateSc:null
+          };
+        });
+      });
+    });
+  });
+})();
+
+function rdDate(d){const dt=new Date(d);dt.setDate(dt.getDate()-Math.floor(Math.random()*8));return dt.toISOString();}
+
+// ══════════════════════════════════════════════════════
+//  GRADE HELPERS
+// ══════════════════════════════════════════════════════
+function getGrade(pct){
+  if(pct==null||isNaN(pct)) return null;
+  return GRADE_SCALE.find(g=>pct>=g.min&&pct<=g.max)||GRADE_SCALE[GRADE_SCALE.length-1];
+}
+function gradeChip(pct){
+  if(pct==null) return '<span style="font-size:10px;color:#9ca3af">–</span>';
+  const g=getGrade(pct);
+  return `<span class="gchip ${g.cls}">${g.grade}</span>`;
+}
+
+// ══════════════════════════════════════════════════════
+//  SUBMISSION AGGREGATION
+// ══════════════════════════════════════════════════════
+// Get aggregate status for a pbItem (worst of all sub-items)
+function itemStatus(subs, pbItemId, subItems){
+  if(!subs[pbItemId]) return 'missing';
+  const statuses = subItems.map(si=>subs[pbItemId][si.id]?.status||'missing');
+  if(statuses.every(s=>s==='missing')) return 'missing';
+  if(statuses.some(s=>s==='missing')) return 'missing';
+  if(statuses.some(s=>s==='lat')) return 'lat';
+  return 'sub';
+}
+
+// Weighted score for a student across ALL pbItems
+function studentWeightedScore(subs, pbItems){
+  let totalEarned=0, totalWeight=0;
+  pbItems.forEach(item=>{
+    totalWeight+=item.weight;
+    // Compute item % from sub-items
+    const pct=itemPct(subs, item);
+    if(pct!=null) totalEarned+=(pct/100)*item.weight;
+  });
+  const scored = pbItems.some(item=>itemPct(subs,item)!=null);
+  return scored ? {score:totalEarned, pct:totalEarned/totalWeight*100} : {score:null,pct:null};
+}
+
+// Average % of sub-items for a pbItem
+function itemPct(subs, item){
+  const scored=[];
+  item.subItems.forEach(si=>{
+    const s=subs[item.id]?.[si.id];
+    if(s?.score!=null && s.status!=='missing') scored.push(s.score/si.maxScore*100);
+  });
+  return scored.length?scored.reduce((a,b)=>a+b,0)/scored.length:null;
+}
+
+// Student summary for a course
+function studentSummary(subs, pbItems){
+  let sub=0,lat=0,miss=0;
+  pbItems.forEach(item=>{
+    const st=itemStatus(subs,item.id,item.subItems);
+    if(st==='sub') sub++; else if(st==='lat') lat++; else miss++;
+  });
+  const total=pbItems.length;
+  const pct=total?Math.round((sub+lat)/total*100):0;
+  const risk=miss>=3||(lat+miss)>=Math.ceil(total*.5);
+  const ws=studentWeightedScore(subs,pbItems);
+  return{sub,lat,miss,pct,risk,weightedScore:ws.score,weightedPct:ws.pct};
+}
+
+function pc(p){return p>=80?'#0e9f6e':p>=50?'#f59e0b':'#ef4444';}
+function fmt(iso){if(!iso)return'–';return new Date(iso).toLocaleDateString('ms-MY',{day:'2-digit',month:'short',year:'numeric'});}
+function isLate(due,ua){return due&&ua?new Date(ua)>new Date(due+'T23:59:59'):false;}
+
+// ══════════════════════════════════════════════════════
+//  APP STATE
+// ══════════════════════════════════════════════════════
+let currentUser=null, curSesi='Sesi I 2024/2025', curCourseId=null;
+let activeFilter='all', searchQuery='';
+let statusCtx=null, selStatusVal=null;
+let markahCtx=null;
+let pendingUploads={}, pendingResets={};
+
+function getCourse(){return curSesi&&curCourseId&&db.courses[curSesi]?db.courses[curSesi][curCourseId]:null;}
+
+// ══════════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════════
+let ttimer;
+function toast(msg,type='t-ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type} show`;
+  clearTimeout(ttimer); ttimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ══════════════════════════════════════════════════════
+//  LANDING CHARTS
+// ══════════════════════════════════════════════════════
+let cPie=null,cBar=null,cDist=null;
+function buildLanding(){
+  // Use first session first course for public stats
+  const sessi = 'Sesi I 2024/2025';
+  const courseIds = db.courses[sessi]?Object.keys(db.courses[sessi]):[];
+  if(!courseIds.length) return;
+  const cid = courseIds[0];
+  const course = db.courses[sessi][cid];
+  const {pbItems,students,submissions} = course;
+
+  let ts=0,tl=0,tm=0,ar=0;
+  const total=students.length*pbItems.length;
+  students.forEach(s=>{
+    const sm=studentSummary(submissions[s.id]||{},pbItems);
+    ts+=sm.sub; tl+=sm.lat; tm+=sm.miss; if(sm.risk)ar++;
+  });
+  const rate=total?Math.round(ts/total*100):0;
+
+  document.getElementById('heroKpi').innerHTML=`
+    <div class="hkpi"><div class="hkpi-v">${students.length}</div><div class="hkpi-l">Pelajar</div></div>
+    <div class="hkpi"><div class="hkpi-v">${pbItems.length}</div><div class="hkpi-l">Item PB</div></div>
+    <div class="hkpi"><div class="hkpi-v">${rate}%</div><div class="hkpi-l">Submission Rate</div></div>
+    <div class="hkpi"><div class="hkpi-v">${ar}</div><div class="hkpi-l">Pelajar Berisiko</div></div>`;
+  document.getElementById('landingOv').innerHTML=`
+    <div class="ovc cb"><div class="ovc-lbl">Pelajar</div><div class="ovc-val">${students.length}</div><div class="ovc-sub">${pbItems.length} item PB aktif</div></div>
+    <div class="ovc cg"><div class="ovc-lbl">Submission Rate</div><div class="ovc-val">${rate}%</div><div class="ovc-sub">${ts} drp ${total} item</div></div>
+    <div class="ovc cy"><div class="ovc-lbl">Hantar Lewat</div><div class="ovc-val">${tl}</div><div class="ovc-sub">Melebihi tarikh akhir</div></div>
+    <div class="ovc cr"><div class="ovc-lbl">Belum Hantar</div><div class="ovc-val">${tm}</div><div class="ovc-sub">${ar} pelajar berisiko</div></div>`;
+
+  if(cPie) cPie.destroy();
+  cPie=new Chart(document.getElementById('cPie'),{type:'doughnut',data:{labels:['Submitted','Lewat','Belum'],datasets:[{data:[ts,tl,tm],backgroundColor:['#0e9f6e','#f59e0b','#ef4444'],borderWidth:2,borderColor:'#fff',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:10}},tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return ` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/tot*100)}%)`;}}}}}});
+
+  const iLabels=pbItems.map(i=>i.name.length>10?i.name.substring(0,10)+'…':i.name);
+  const iRates=pbItems.map(item=>{const s=students.filter(st=>(submissions[st.id]||{})[item.id]&&itemStatus(submissions[st.id]||{},item.id,item.subItems)==='sub').length;return Math.round(s/students.length*100);});
+  if(cBar) cBar.destroy();
+  cBar=new Chart(document.getElementById('cBar'),{type:'bar',data:{labels:iLabels,datasets:[{label:'% Submit',data:iRates,backgroundColor:iRates.map(r=>r>=80?'#0e9f6e':r>=50?'#f59e0b':'#ef4444'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:9}},grid:{color:'#f3f4f6'}},x:{ticks:{font:{size:8}},grid:{display:false}}},plugins:{legend:{display:false}}}});
+
+  const buckets=[0,0,0,0];
+  students.forEach(s=>{const sm=studentSummary(submissions[s.id]||{},pbItems);if(sm.sub===0)buckets[0]++;else if(sm.sub<=2)buckets[1]++;else if(sm.sub<=4)buckets[2]++;else buckets[3]++;});
+  if(cDist) cDist.destroy();
+  cDist=new Chart(document.getElementById('cDist'),{type:'bar',data:{labels:['0 item','1–2 item','3–4 item','5+ item'],datasets:[{label:'Bil Pelajar',data:buckets,backgroundColor:['#ef4444','#f59e0b','#3b82f6','#0e9f6e'],borderRadius:5,barThickness:32}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{font:{size:9},stepSize:1},grid:{color:'#f3f4f6'}},x:{ticks:{font:{size:9}},grid:{display:false}}},plugins:{legend:{display:false}}}});
+
+  document.getElementById('iprRows').innerHTML=pbItems.map(item=>{
+    let sub=0,lat=0,miss=0;
+    students.forEach(s=>{const st=itemStatus(submissions[s.id]||{},item.id,item.subItems);if(st==='sub')sub++;else if(st==='lat')lat++;else miss++;});
+    const n=students.length;
+    const ws=sub/n*100,wl=lat/n*100,wm=miss/n*100;
+    return `<div class="ipr"><div><div class="ipr-name">${item.name}</div><div class="ipr-due">Due: ${item.due||'–'} · ${item.weight}%</div></div><div class="sbar"><div class="ss ss-s" style="width:${ws}%"></div><div class="ss ss-l" style="width:${wl}%"></div><div class="ss ss-m" style="width:${wm}%"></div></div><div class="cc2 cc2-s">${sub}</div><div class="cc2 cc2-l">${lat}</div><div class="cc2 cc2-m">${miss}</div></div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════════
+let loginRole='lecturer';
+function openLogin(role='lecturer'){
+  loginRole=role; selRole(role);
+  document.getElementById('loginModal').classList.remove('hidden');
+  setTimeout(()=>document.getElementById('loId').focus(),100);
+}
+function closeLogin(){document.getElementById('loginModal').classList.add('hidden');}
+document.getElementById('loginModal').addEventListener('click',e=>{if(e.target===document.getElementById('loginModal'))closeLogin();});
+
+function selRole(r){
+  loginRole=r;
+  document.getElementById('rtL').classList.toggle('active',r==='lecturer');
+  document.getElementById('rtS').classList.toggle('active',r==='student');
+  document.getElementById('loIdLbl').textContent=r==='lecturer'?'ID Pensyarah':'No. Matrik';
+  document.getElementById('loId').placeholder=r==='lecturer'?'cth: L001':'cth: D24A001';
+  document.getElementById('loErr').classList.remove('show');
+}
+
+function doLogin(){
+  const id=document.getElementById('loId').value.trim();
+  const pw=document.getElementById('loPw').value;
+  const err=document.getElementById('loErr');
+  err.classList.remove('show');
+  if(loginRole==='lecturer'){
+    const acc=LECTURERS.find(l=>l.id.toLowerCase()===id.toLowerCase()&&l.password===pw);
+    if(!acc){err.classList.add('show');return;}
+    currentUser={id:acc.id,name:acc.name,role:'lecturer'};
+  } else {
+    // Find student in any course
+    let found=null;
+    outer:for(const sess of Object.values(db.courses))
+      for(const course of Object.values(sess))
+        for(const stu of course.students)
+          if(stu.id.toLowerCase()===id.toLowerCase()){found=stu;break outer;}
+    if(!found||pw!==STUDENT_PW){err.classList.add('show');return;}
+    currentUser={id:found.id,name:found.name,role:'student'};
+  }
+  closeLogin();
+  document.getElementById('loId').value='';
+  document.getElementById('loPw').value='';
+
+  document.body.classList.toggle('role-student', currentUser.role==='student');
+  document.body.classList.toggle('role-lecturer',currentUser.role==='lecturer');
+
+  // header
+  const ini=currentUser.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  const av=document.getElementById('uav');
+  av.textContent=ini; av.className='uav '+(currentUser.role==='lecturer'?'uav-l':'uav-s');
+  document.getElementById('uname').textContent=currentUser.name;
+  document.getElementById('urole').textContent=currentUser.role==='lecturer'?'👨‍🏫 Pensyarah':'🎓 Pelajar';
+
+  // switch screen
+  document.getElementById('screenLanding').classList.remove('active');
+  document.getElementById('screenApp').classList.add('active');
+
+  if(currentUser.role==='lecturer'){
+    buildSesiSelector();
+    // set default course
+    const courses=db.courses[curSesi]||{};
+    const ids=Object.keys(courses).filter(id=>courses[id].lecturerId===currentUser.id);
+    curCourseId=ids[0]||Object.keys(courses)[0]||null;
+    buildCoursePills();
+  }
+
+  resetAppTabs();
+  renderApp();
+}
+
+function doLogout(){
+  currentUser=null;
+  document.body.classList.remove('role-student','role-lecturer');
+  document.getElementById('screenApp').classList.remove('active');
+  document.getElementById('screenLanding').classList.add('active');
+  buildLanding();
+}
+
+// ══════════════════════════════════════════════════════
+//  SESSION / COURSE SELECTORS
+// ══════════════════════════════════════════════════════
+function buildSesiSelector(){
+  const sel=document.getElementById('selSesi');
+  sel.innerHTML=SESSIONS.filter(s=>db.courses[s]).map(s=>`<option ${s===curSesi?'selected':''}>${s}</option>`).join('');
+}
+function onSesiChange(){
+  curSesi=document.getElementById('selSesi').value;
+  const courses=db.courses[curSesi]||{};
+  const ids=Object.keys(courses).filter(id=>courses[id].lecturerId===currentUser.id);
+  curCourseId=ids[0]||Object.keys(courses)[0]||null;
+  buildCoursePills(); renderApp();
+}
+function buildCoursePills(){
+  const courses=db.courses[curSesi]||{};
+  const ids=Object.keys(courses).filter(id=>courses[id].lecturerId===currentUser.id);
+  document.getElementById('coursePills').innerHTML=ids.map(id=>{
+    const c=courses[id];
+    return `<div class="cpill${id===curCourseId?' active':''}" onclick="selectCourse('${id}')">${c.code} – ${c.name}</div>`;
+  }).join('');
+  const hdr=document.getElementById('ahdrCourse');
+  if(curCourseId&&courses[curCourseId]){hdr.textContent=courses[curCourseId].code+' – '+courses[curCourseId].name;hdr.style.display='';}
+  else hdr.style.display='none';
+}
+function selectCourse(id){
+  curCourseId=id;
+  document.querySelectorAll('.cpill').forEach(p=>p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  const courses=db.courses[curSesi]||{};
+  const hdr=document.getElementById('ahdrCourse');
+  if(courses[id]){hdr.textContent=courses[id].code+' – '+courses[id].name;hdr.style.display='';}
+  renderApp();
+}
+
+// ══════════════════════════════════════════════════════
+//  APP RENDER ORCHESTRATOR
+// ══════════════════════════════════════════════════════
+let dashPieChart=null, dashBarChart=null, gradeChart=null, avgChart=null;
+function destroyChart(c){try{if(c)c.destroy();}catch(e){}}
+
+function renderApp(){
+  if(!currentUser) return;
+  if(currentUser.role==='lecturer') renderLecturerDash();
+  else renderStudentDash();
+}
+
+// ══════════════════════════════════════════════════════
+//  LECTURER DASHBOARD
+// ══════════════════════════════════════════════════════
+function renderLecturerDash(){
+  const course=getCourse(); if(!course) return;
+  const {pbItems,students,submissions}=course;
+  document.getElementById('ahdrSub').textContent=`${curSesi} · ${course.code} – ${course.name}`;
+  renderLStats(pbItems,students,submissions);
+  renderAlerts(pbItems,students,submissions);
+  renderGrid(pbItems,students,submissions);
+  renderDashCharts(pbItems,students,submissions);
+  renderCQI(pbItems,students,submissions);
+  if(document.getElementById('pageItems').classList.contains('active')) renderItemPage();
+}
+
+function renderLStats(pbItems,students,submissions){
+  let ts=0,tl=0,tm=0,ar=0;
+  const total=students.length*pbItems.length;
+  students.forEach(s=>{const sm=studentSummary(submissions[s.id]||{},pbItems);ts+=sm.sub;tl+=sm.lat;tm+=sm.miss;if(sm.risk)ar++;});
+  const rate=total?Math.round(ts/total*100):0;
+  document.getElementById('lStatsRow').innerHTML=`
+    <div class="sc sg"><div class="sc-lbl">Submission Rate</div><div class="sc-val">${rate}%</div><div class="sc-sub">${ts} drp ${total} item</div></div>
+    <div class="sc sy"><div class="sc-lbl">Hantar Lewat</div><div class="sc-val">${tl}</div><div class="sc-sub">Melebihi tarikh akhir</div></div>
+    <div class="sc sr"><div class="sc-lbl">Belum Hantar</div><div class="sc-val">${tm}</div><div class="sc-sub">Tiada submission</div></div>
+    <div class="sc sb"><div class="sc-lbl">Pelajar Berisiko</div><div class="sc-val">${ar}</div><div class="sc-sub">≥3 missing / ≥50% lewat</div></div>`;
+}
+
+function renderAlerts(pbItems,students,submissions){
+  const items=[];
+  students.forEach(s=>{
+    const sm=studentSummary(submissions[s.id]||{},pbItems);
+    if(sm.miss>0) items.push({type:'miss',name:s.name,id:s.id,desc:`${sm.miss} item belum dihantar`,lbl:'BELUM HANTAR',pri:sm.miss*3});
+    if(sm.lat>0)  items.push({type:'late',name:s.name,id:s.id,desc:`${sm.lat} item dihantar lewat`,lbl:'LEWAT',pri:sm.lat});
+    if(sm.risk&&sm.miss===0) items.push({type:'risk',name:s.name,id:s.id,desc:`${sm.lat} lewat — corak lump-sum dikesan`,lbl:'BERISIKO',pri:10});
+  });
+  items.sort((a,b)=>b.pri-a.pri);
+  const ico={miss:'❌',late:'⚠️',risk:'🔴'};
+  document.getElementById('alertCnt').textContent=`${items.length} notifikasi`;
+  document.getElementById('alertList').innerHTML=items.length
+    ?items.map(i=>`<div class="ai ${i.type}"><span class="ai-ico">${ico[i.type]}</span><div style="flex:1"><div class="ai-name">${i.name} <span style="font-weight:400;color:#57606a;font-size:10px">(${i.id})</span></div><div class="ai-desc">${i.desc}</div></div><span class="ai-badge">${i.lbl}</span></div>`).join('')
+    :'<div style="text-align:center;padding:12px;color:#57606a;font-size:11px">✅ Tiada alert — semua pelajar dalam keadaan baik!</div>';
+}
+
+function renderGrid(pbItems,students,submissions){
+  const isStu=currentUser.role==='student';
+  let filtered=isStu?students.filter(s=>s.id===currentUser.id):students.filter(s=>{
+    if(searchQuery&&!s.name.toLowerCase().includes(searchQuery.toLowerCase())&&!s.id.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    const sm=studentSummary(submissions[s.id]||{},pbItems);
+    if(activeFilter==='miss') return sm.miss>0;
+    if(activeFilter==='late') return sm.lat>0;
+    if(activeFilter==='risk') return sm.risk;
+    return true;
+  });
+  const heads=pbItems.map(item=>`<th title="${item.weight}%">${item.name}<br/><span style="font-size:8px;background:#dbeafe;color:#1e40af;padding:1px 4px;border-radius:99px">${item.weight}%</span></th>`).join('');
+  const lbls={sub:'✅ Sub',lat:'⚠️ Lewat',missing:'❌ Belum'};
+  const rows=filtered.map(s=>{
+    const subs=submissions[s.id]||{};
+    const sm=studentSummary(subs,pbItems);
+    const isMe=isStu&&s.id===currentUser.id;
+    const cells=pbItems.map(item=>{
+      const st=itemStatus(subs,item.id,item.subItems);
+      const pct=itemPct(subs,item);
+      const clickAttr=`class="chip ${st}${!isStu?' ck':''}"${!isStu?' onclick="openMarkahModal(event)"':''}`;
+      const markahStr=pct!=null?`<br/><span style="font-size:9px;font-weight:600;color:#374151">${pct.toFixed(1)}% ${gradeChip(pct)}</span>`:'';
+      return `<td data-sid="${s.id}" data-iid="${item.id}"><span ${clickAttr}>${lbls[st]||'❌'}</span>${markahStr}</td>`;
+    }).join('');
+    const scv=sm.weightedPct;
+    const scCls=scv==null?'':scv>=80?'sv-h':scv>=50?'sv-m':'sv-l';
+    const gd=scv!=null?gradeChip(scv):'–';
+    const nameClick=!isStu?` style="cursor:pointer;color:#1a3a5c;text-decoration:underline dotted" onclick="openStuCqiModal('${s.id}')" title="Lihat analisis sub-item pelajar"`:'' ;
+    return `<tr${isMe?' class="myrow"':''}>
+      <td class="sn"><span${nameClick}>${sm.risk?'🔴 ':''}${s.name}</span><div class="sid">${s.id}</div></td>
+      <td><div class="pw"><div class="pf" style="width:${sm.pct}%;background:${pc(sm.pct)}"></div></div><div class="pl">${sm.pct}%</div></td>
+      ${cells}
+      <td><span class="score-val ${scCls}">${scv!=null?scv.toFixed(1)+'%':'–'}</span> ${gd}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('mainGrid').innerHTML=`
+    <thead><tr><th class="tl">Pelajar</th><th>Progress</th>${heads}<th>Skor PB / Gred</th></tr></thead>
+    <tbody>${rows||'<tr><td colspan="100" style="text-align:center;padding:16px;color:#57606a">Tiada rekod.</td></tr>'}</tbody>`;
+}
+
+function renderDashCharts(pbItems,students,submissions){
+  let ts=0,tl=0,tm=0;
+  students.forEach(s=>{const sm=studentSummary(submissions[s.id]||{},pbItems);ts+=sm.sub;tl+=sm.lat;tm+=sm.miss;});
+  const course=getCourse();
+  document.getElementById('dashPieSub').textContent=`${course?.code||''} – ${curSesi}`;
+  destroyChart(dashPieChart);
+  dashPieChart=new Chart(document.getElementById('dashPie'),{type:'doughnut',data:{labels:['Submitted','Lewat','Belum'],datasets:[{data:[ts,tl,tm],backgroundColor:['#0e9f6e','#f59e0b','#ef4444'],borderWidth:2,borderColor:'#fff',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}},tooltip:{callbacks:{label:ctx=>{const tot=ctx.dataset.data.reduce((a,b)=>a+b,0);return ` ${ctx.label}: ${ctx.raw} (${Math.round(ctx.raw/tot*100)}%)`;}}}}}});
+  const iLabels=pbItems.map(i=>i.name.length>10?i.name.substring(0,10)+'…':i.name);
+  const iRates=pbItems.map(item=>{const s=students.filter(st=>itemStatus(submissions[st.id]||{},item.id,item.subItems)==='sub').length;return Math.round(s/students.length*100);});
+  destroyChart(dashBarChart);
+  dashBarChart=new Chart(document.getElementById('dashBar'),{type:'bar',data:{labels:iLabels,datasets:[{label:'% Submit',data:iRates,backgroundColor:iRates.map(r=>r>=80?'#0e9f6e':r>=50?'#f59e0b':'#ef4444'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:9}},grid:{color:'#f3f4f6'}},x:{ticks:{font:{size:8}},grid:{display:false}}},plugins:{legend:{display:false}}}});
+}
+
+function renderCQI(pbItems,students,submissions){
+  const html=pbItems.map(item=>{
+    const subAvgs=item.subItems.map(si=>{
+      const scores=students.map(s=>{const sub=submissions[s.id]?.[item.id]?.[si.id];return sub?.score!=null&&sub.status!=='missing'?sub.score/si.maxScore*100:null;}).filter(v=>v!=null);
+      const avg=scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:null;
+      return{name:si.name,avg,maxScore:si.maxScore};
+    });
+    const rows=subAvgs.map(sa=>{
+      const col=sa.avg==null?'#9ca3af':sa.avg>=80?'#0e9f6e':sa.avg>=60?'#f59e0b':'#ef4444';
+      const flag=sa.avg!=null&&sa.avg<60?' ⚠️':'';
+      return `<div class="cqi-sub-row">
+        <span class="cqi-sub-name" title="${sa.name}">${sa.name}${flag}</span>
+        <div class="cqi-mini-bar"><div class="cqi-mini-fill" style="width:${sa.avg??0}%;background:${col}"></div></div>
+        <span class="cqi-pct" style="color:${col}">${sa.avg!=null?sa.avg.toFixed(0)+'%':'–'}</span>
+      </div>`;
+    }).join('');
+    return `<div class="cqi-card"><div class="cqi-card-name">${item.name} <span style="font-size:10px;color:#57606a">(${item.weight}%)</span></div>${rows}</div>`;
+  }).join('');
+  document.getElementById('cqiGrid').innerHTML=html;
+}
+
+// ══════════════════════════════════════════════════════
+//  ITEM PAGE
+// ══════════════════════════════════════════════════════
+function renderItemPage(){
+  const course=getCourse(); if(!course) return;
+  const {pbItems,students,submissions}=course;
+  document.getElementById('itemGrid').innerHTML=pbItems.map(item=>{
+    let sub=0,lat=0,miss=0;
+    students.forEach(s=>{const st=itemStatus(submissions[s.id]||{},item.id,item.subItems);if(st==='sub')sub++;else if(st==='lat')lat++;else miss++;});
+    const pct=Math.round(sub/students.length*100);
+    const avgPctArr=students.map(s=>itemPct(submissions[s.id]||{},item)).filter(v=>v!=null);
+    const avg=avgPctArr.length?avgPctArr.reduce((a,b)=>a+b,0)/avgPctArr.length:null;
+    return `<div class="icard">
+      <div class="icard-hdr"><div class="icard-name">${item.name}</div><span class="icard-w">${item.weight}%</span></div>
+      <div class="ibar-wrap"><div class="ibar-fill" style="width:${pct}%;background:${pc(pct)}"></div></div>
+      <div class="icard-stats"><span>✅ ${sub}</span><span>⚠️ ${lat}</span><span>❌ ${miss}</span><span style="font-weight:600">${pct}% submit</span></div>
+      ${avg!=null?`<div class="icard-due">Purata markah: <span>${avg.toFixed(1)}% ${gradeChip(avg)}</span></div>`:''}
+      ${item.due?`<div class="icard-due">Tarikh Akhir: <span>${item.due}</span></div>`:''}
+    </div>`;
+  }).join('');
+
+  // Grade distribution chart
+  const scoredStudents=students.map(s=>{const ws=studentWeightedScore(submissions[s.id]||{},pbItems);return ws.pct;}).filter(v=>v!=null);
+  const gradeCounts={};
+  GRADE_SCALE.forEach(g=>gradeCounts[g.grade]=0);
+  scoredStudents.forEach(pct=>{const g=getGrade(pct);if(g)gradeCounts[g.grade]++;});
+  const gLabels=GRADE_SCALE.map(g=>g.grade);
+  const gData=gLabels.map(g=>gradeCounts[g]||0);
+  const gColors=['#0e9f6e','#0e9f6e','#3b82f6','#3b82f6','#6366f1','#f59e0b','#f59e0b','#f97316','#ef4444','#dc2626','#9ca3af'];
+  destroyChart(gradeChart);
+  gradeChart=new Chart(document.getElementById('gradeChart'),{type:'bar',data:{labels:gLabels,datasets:[{label:'Bil Pelajar',data:gData,backgroundColor:gColors,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{stepSize:1,font:{size:9}},grid:{color:'#f3f4f6'}},x:{ticks:{font:{size:9}},grid:{display:false}}},plugins:{legend:{display:false}}}});
+
+  // Avg score per item
+  const iAvgs=pbItems.map(item=>{const arr=students.map(s=>itemPct(submissions[s.id]||{},item)).filter(v=>v!=null);return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:0;});
+  destroyChart(avgChart);
+  avgChart=new Chart(document.getElementById('avgChart'),{type:'bar',data:{labels:pbItems.map(i=>i.name.length>10?i.name.substring(0,10)+'…':i.name),datasets:[{label:'Purata %',data:iAvgs.map(v=>+v.toFixed(1)),backgroundColor:iAvgs.map(v=>v>=80?'#0e9f6e':v>=60?'#f59e0b':'#ef4444'),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%',font:{size:9}},grid:{color:'#f3f4f6'}},x:{ticks:{font:{size:8}},grid:{display:false}}},plugins:{legend:{display:false}}}});
+
+  // Grade stats
+  if(scoredStudents.length){
+    const mn=Math.min(...scoredStudents),mx=Math.max(...scoredStudents),av=scoredStudents.reduce((a,b)=>a+b,0)/scoredStudents.length;
+    const pass=scoredStudents.filter(v=>v>=50).length;
+    document.getElementById('gradeStats').innerHTML=`
+      <table style="width:100%;font-size:11px;border-collapse:collapse">
+        <tr><td style="padding:4px 0;color:#57606a">Bilangan Pelajar</td><td style="text-align:right;font-weight:600">${scoredStudents.length}</td></tr>
+        <tr><td style="padding:4px 0;color:#57606a">Markah Tertinggi</td><td style="text-align:right;font-weight:600;color:#0e9f6e">${mx.toFixed(1)}% ${gradeChip(mx)}</td></tr>
+        <tr><td style="padding:4px 0;color:#57606a">Markah Terendah</td><td style="text-align:right;font-weight:600;color:#ef4444">${mn.toFixed(1)}% ${gradeChip(mn)}</td></tr>
+        <tr><td style="padding:4px 0;color:#57606a">Purata Kelas</td><td style="text-align:right;font-weight:600;color:#3b82f6">${av.toFixed(1)}% ${gradeChip(av)}</td></tr>
+        <tr><td style="padding:4px 0;color:#57606a">% Lulus (≥50%)</td><td style="text-align:right;font-weight:600">${Math.round(pass/scoredStudents.length*100)}%</td></tr>
+      </table>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  MARKAH MODAL
+// ══════════════════════════════════════════════════════
+function openMarkahModal(e){
+  if(!currentUser||currentUser.role!=='lecturer') return;
+  const td=e.target.closest('td'); if(!td) return;
+  const sid=td.dataset.sid,iid=td.dataset.iid; if(!sid||!iid) return;
+  const course=getCourse(); if(!course) return;
+  const stu=course.students.find(s=>s.id===sid);
+  const item=course.pbItems.find(p=>p.id===iid);
+  if(!item) return;
+  markahCtx={sid,iid};
+  document.getElementById('mmTitle').textContent=`Input Markah — ${item.name}`;
+  document.getElementById('mmSub').textContent=`${stu?.name} (${sid}) · Wajaran: ${item.weight}%`;
+  const subs=course.submissions[sid]||{};
+  const tbody=document.getElementById('mmTableBody');
+  tbody.innerHTML=item.subItems.map(si=>{
+    const cur=subs[iid]?.[si.id];
+    const curScore=cur?.score??'';
+    return `<tr>
+      <td>${si.name}</td>
+      <td><input class="markah-input" type="number" id="mscore-${si.id}" value="${curScore}" min="0" max="${si.maxScore}" oninput="updateMarkahSummary()" placeholder="–"/></td>
+      <td class="markah-max">/ ${si.maxScore}</td>
+      <td class="markah-pct" id="mpct-${si.id}">${curScore!==''?((curScore/si.maxScore)*100).toFixed(1)+'%':'–'}</td>
+    </tr>`;
+  }).join('');
+  updateMarkahSummary();
+  document.getElementById('markahModal').classList.remove('hidden');
+}
+function updateMarkahSummary(){
+  const course=getCourse(); if(!course||!markahCtx) return;
+  const item=course.pbItems.find(p=>p.id===markahCtx.iid); if(!item) return;
+  let pcts=[];
+  item.subItems.forEach(si=>{
+    const inp=document.getElementById(`mscore-${si.id}`);
+    const pctEl=document.getElementById(`mpct-${si.id}`);
+    if(inp){
+      const v=parseFloat(inp.value);
+      if(!isNaN(v)&&v>=0&&v<=si.maxScore){pcts.push(v/si.maxScore*100);if(pctEl)pctEl.textContent=(v/si.maxScore*100).toFixed(1)+'%';}
+      else{if(pctEl)pctEl.textContent='–';}
+    }
+  });
+  const avg=pcts.length?pcts.reduce((a,b)=>a+b,0)/pcts.length:null;
+  const wScore=avg!=null?(avg/100)*item.weight:null;
+  document.getElementById('mmSummary').innerHTML=`
+    <div class="ms-item"><div class="ms-label">Purata Sub-Item</div><div class="ms-value" style="color:${avg!=null?pc(avg):'#9ca3af'}">${avg!=null?avg.toFixed(1)+'%':'–'}</div></div>
+    <div class="ms-item"><div class="ms-label">Markah Wajaran</div><div class="ms-value">${wScore!=null?wScore.toFixed(2):'–'} / ${item.weight}</div></div>
+    <div class="ms-item"><div class="ms-label">Gred Item</div><div class="ms-value">${avg!=null?gradeChip(avg):'–'}</div></div>`;
+}
+function closeMarkahModal(){document.getElementById('markahModal').classList.add('hidden');markahCtx=null;}
+function saveMarkah(){
+  const course=getCourse(); if(!course||!markahCtx) return;
+  const{sid,iid}=markahCtx;
+  const item=course.pbItems.find(p=>p.id===iid); if(!item) return;
+  if(!course.submissions[sid]) course.submissions[sid]={};
+  if(!course.submissions[sid][iid]) course.submissions[sid][iid]={};
+  let allValid=true;
+  item.subItems.forEach(si=>{
+    const inp=document.getElementById(`mscore-${si.id}`);
+    const v=parseFloat(inp?.value);
+    if(isNaN(v)||v<0||v>si.maxScore){allValid=false;return;}
+    if(!course.submissions[sid][iid][si.id]) course.submissions[sid][iid][si.id]={status:'sub',note:'',fileName:null,uploadedAt:null};
+    course.submissions[sid][iid][si.id].score=v;
+    // auto-set status to submitted if missing
+    if(course.submissions[sid][iid][si.id].status==='missing') course.submissions[sid][iid][si.id].status='sub';
+  });
+  if(!allValid){toast('Sila semak semua markah diisi dengan betul','t-warn');return;}
+  closeMarkahModal(); toast('✅ Markah disimpan!'); renderLecturerDash();
+  buildLanding();
+}
+
+// ══════════════════════════════════════════════════════
+//  STATUS MODAL
+// ══════════════════════════════════════════════════════
+function openStatusModal(e){
+  if(!currentUser||currentUser.role!=='lecturer') return;
+  const td=e.target.closest('td'); if(!td) return;
+  const sid=td.dataset.sid,iid=td.dataset.iid; if(!sid||!iid) return;
+  statusCtx={sid,iid}; selStatusVal=null;
+  const course=getCourse();
+  const stu=course?.students.find(s=>s.id===sid);
+  const item=course?.pbItems.find(p=>p.id===iid);
+  document.getElementById('smTitle').textContent='Kemaskini Status';
+  document.getElementById('smSub').textContent=`${stu?.name} · ${item?.name} (${item?.weight}%)`;
+  document.getElementById('smNote').value='';
+  document.querySelectorAll('.mchip').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('statusModal').classList.remove('hidden');
+}
+function selStatus(s){selStatusVal=s;document.querySelectorAll('.mchip').forEach(c=>c.classList.remove('sel'));document.querySelector(`.mchip.${s}`)?.classList.add('sel');}
+function closeStatusModal(){document.getElementById('statusModal').classList.add('hidden');statusCtx=null;}
+function saveStatus(){
+  if(!statusCtx||!selStatusVal){if(!selStatusVal)alert('Sila pilih status!');return;}
+  const course=getCourse(); if(!course) return;
+  const{sid,iid}=statusCtx;
+  const item=course.pbItems.find(p=>p.id===iid);
+  if(!course.submissions[sid]) course.submissions[sid]={};
+  if(!course.submissions[sid][iid]) course.submissions[sid][iid]={};
+  // Apply status to all sub-items
+  item.subItems.forEach(si=>{
+    if(!course.submissions[sid][iid][si.id]) course.submissions[sid][iid][si.id]={status:selStatusVal,note:'',fileName:null,uploadedAt:null};
+    else course.submissions[sid][iid][si.id].status=selStatusVal;
+  });
+  closeStatusModal(); toast('✅ Status dikemaskini'); renderLecturerDash(); buildLanding();
+}
+document.getElementById('statusModal').addEventListener('click',e=>{if(e.target===document.getElementById('statusModal'))closeStatusModal();});
+
+// ══════════════════════════════════════════════════════
+//  STUDENT DASHBOARD
+// ══════════════════════════════════════════════════════
+function renderStudentDash(){
+  // Find all courses this student is enrolled in across all sessions
+  const myCourses=[];
+  Object.entries(db.courses).forEach(([sess,courses])=>{
+    Object.entries(courses).forEach(([cid,course])=>{
+      if(course.students.find(s=>s.id===currentUser.id)){
+        myCourses.push({sess,cid,course});
+      }
+    });
+  });
+
+  // Group by session
+  const bySession={};
+  myCourses.forEach(({sess,cid,course})=>{if(!bySession[sess])bySession[sess]=[];bySession[sess].push({cid,course});});
+
+  // Show latest session first
+  const sessions=Object.keys(bySession).sort().reverse();
+  const latestSess=sessions[0];
+  if(latestSess) document.getElementById('stuSesiLabel').textContent=latestSess;
+
+  const sid=currentUser.id;
+
+  // ── GPA Panel ──
+  const gpaPanelEl=document.getElementById('stuGpaPanel');
+  const sessCoursesForGpa=bySession[latestSess]||[];
+  const gradedCourses=sessCoursesForGpa.map(({cid,course})=>{
+    const subs=course.submissions[sid]||{};
+    const ws=studentWeightedScore(subs,course.pbItems);
+    const g=ws.pct!=null?getGrade(ws.pct):null;
+    return{cid,course,ws,g};
+  }).filter(x=>x.g!=null);
+  if(gradedCourses.length){
+    const totalGP=gradedCourses.reduce((a,x)=>a+x.g.gp,0);
+    const cgpa=(totalGP/gradedCourses.length).toFixed(2);
+    const avgPct=(gradedCourses.reduce((a,x)=>a+x.ws.pct,0)/gradedCourses.length).toFixed(1);
+    const pillsHtml=gradedCourses.map(x=>`<div class="gpa-course-pill">${x.course.code}<span class="gpc-g" style="color:${x.ws.pct>=70?'#0e9f6e':x.ws.pct>=50?'#f59e0b':'#ef4444'}">${x.ws.pct.toFixed(1)}% ${x.g.grade}</span></div>`).join('');
+    gpaPanelEl.style.display='flex';
+    gpaPanelEl.innerHTML=`
+      <div class="gpa-block"><div class="gpa-val">${cgpa}</div><div class="gpa-lbl">GPA Sesi</div></div>
+      <div class="gpa-divider"></div>
+      <div class="gpa-block"><div class="gpa-val">${avgPct}%</div><div class="gpa-lbl">Purata PB</div></div>
+      <div class="gpa-divider"></div>
+      <div class="gpa-block"><div class="gpa-val">${gradedCourses.length}</div><div class="gpa-lbl">Kursus Dimarkah</div></div>
+      <div class="gpa-divider"></div>
+      <div class="gpa-courses">${pillsHtml}</div>`;
+  } else {
+    gpaPanelEl.style.display='none';
+  }
+
+  document.getElementById('myCoursesGrid').innerHTML=sessCoursesForGpa.map(({cid,course})=>{
+    const subs=course.submissions[sid]||{};
+    const sm=studentSummary(subs,course.pbItems);
+    const ws=studentWeightedScore(subs,course.pbItems);
+    const g=ws.pct!=null?getGrade(ws.pct):null;
+    return `<div class="mccard" onclick="showStudentCourseDetail('${latestSess}','${cid}')">
+      <div class="mccard-hdr">
+        <div class="mccard-code">${course.code}</div>
+        <div class="mccard-name">${course.name}</div>
+        <div class="mccard-lec">👨‍🏫 ${LECTURERS.find(l=>l.id===course.lecturerId)?.name||course.lecturerId}</div>
+      </div>
+      <div class="mccard-body">
+        <div class="mccard-stats">
+          <div class="mcs cg"><div class="mcs-v">${sm.sub}</div><div class="mcs-l">Submitted</div></div>
+          <div class="mcs cy"><div class="mcs-v">${sm.lat}</div><div class="mcs-l">Lewat</div></div>
+          <div class="mcs cr"><div class="mcs-v">${sm.miss}</div><div class="mcs-l">Belum</div></div>
+        </div>
+        <div class="mccard-prog"><div class="mccard-prog-fill" style="width:${sm.pct}%;background:${pc(sm.pct)}"></div></div>
+        <div class="mccard-grade">${ws.pct!=null?`${ws.pct.toFixed(1)}% — Gred ${g?.grade||'–'}`:'Markah belum tersedia'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showStudentCourseDetail(sess, cid){
+  const course=db.courses[sess]?.[cid]; if(!course) return;
+  const sid=currentUser.id;
+  const subs=course.submissions[sid]||{};
+  const ws=studentWeightedScore(subs,course.pbItems);
+  const g=ws.pct!=null?getGrade(ws.pct):null;
+
+  const detailEl=document.getElementById('stuCourseDetail');
+  detailEl.style.display='block';
+  document.getElementById('myCoursesGrid').style.display='none';
+  document.getElementById('stuSesiLabel').innerHTML=`<span style="cursor:pointer;color:#3b82f6" onclick="backToCourseList()">← Kursus Saya</span> › ${course.code} – ${course.name}`;
+
+  const pbHtml=course.pbItems.map(item=>{
+    const itemSubs=subs[item.id]||{};
+    const ip=itemPct(subs,item);
+    const ist=itemStatus(subs,item.id,item.subItems);
+    const lbls={sub:'✅ Submitted',lat:'⚠️ Lewat',missing:'❌ Belum Hantar'};
+    const isOverdue=item.due?new Date()>new Date(item.due+'T23:59:59'):false;
+
+    const subItemsHtml=item.subItems.map(si=>{
+      const sub=itemSubs[si.id]||{status:'missing'};
+      const isReupMode=!!pendingResets[item.id+'_'+si.id];
+      let upArea='';
+      if((sub.status==='sub'||sub.status==='lat')&&!isReupMode){
+        upArea=`<div class="done-info">📎<span style="flex:1"><strong>${sub.fileName||'Fail dihantar'}</strong><br/><span style="font-size:10px;color:#57606a">${fmt(sub.uploadedAt)}</span></span>
+          <button class="reup-btn" onclick="startReup('${sess}','${cid}','${sid}','${item.id}','${si.id}')">Hantar Semula</button></div>`;
+      } else if(isReupMode||(sub.status==='missing'&&sub.status!=='sub'&&sub.status!=='lat')){
+        const hp=!!pendingUploads[item.id+'_'+si.id];
+        const cancelBtn=isReupMode?`<button class="cancel-up-btn" onclick="cancelReup('${sess}','${cid}','${sid}','${item.id}','${si.id}')">✕ Batal</button>`:'';
+        upArea=`<div class="upload-zone${hp?' hf':''}" id="uz-${item.id}-${si.id}">
+          <input type="file" accept=".pdf,.doc,.docx,.zip,.png,.jpg"
+            onchange="handleFile(event,'${sid}','${item.id}','${si.id}')"
+            ondragover="this.parentElement.classList.add('drag')"
+            ondragleave="this.parentElement.classList.remove('drag')"/>
+          <span class="uz-icon">${hp?'📎':'📤'}</span>
+          <div class="uz-txt"><strong>${hp?'Fail dipilih':'Klik atau seret fail'}</strong>
+          <span id="fn-${item.id}-${si.id}">${hp?pendingUploads[item.id+'_'+si.id].name:'PDF, Word, ZIP (maks 10MB)'}</span></div>
+        </div>
+        <button class="upload-btn" id="ubtn-${item.id}-${si.id}" onclick="submitUpload('${sess}','${cid}','${sid}','${item.id}','${si.id}')" ${hp?'':'disabled'}>Hantar</button>
+        ${cancelBtn}`;
+      }
+      // Markah display
+      const markahDisplay=sub.score!=null?`<span class="markah-chip">📊 ${sub.score}/${si.maxScore} (${(sub.score/si.maxScore*100).toFixed(0)}%) ${gradeChip(sub.score/si.maxScore*100)}</span>`:'<span style="font-size:10px;color:#9ca3af">Belum dimarkah</span>';
+
+      return `<div class="sub-entry-row">
+        <span style="font-size:11px;font-weight:600;min-width:120px;color:#374151">${si.name}</span>
+        <span class="chip ${sub.status}" style="flex-shrink:0">${lbls[sub.status]||'–'}</span>
+        ${upArea}
+        ${markahDisplay}
+      </div>`;
+    }).join('');
+
+    return `<div class="sub-item-block"${isOverdue&&ist==='missing'?' style="border-left:3px solid #ef4444"':isOverdue&&ist==='lat'?' style="border-left:3px solid #f59e0b"':''}>
+      <div class="sib-hdr">
+        <div class="sib-name">${item.name}</div>
+        <span class="sib-weight">${item.weight}%</span>
+        <span class="chip ${ist}" style="font-size:10px">${lbls[ist]||'–'}</span>
+        ${ip!=null?`<span class="markah-chip">Purata: ${ip.toFixed(1)}% ${gradeChip(ip)}</span>`:''}
+        ${item.due?`<span style="font-size:10px;color:${isOverdue&&ist==='missing'?'#ef4444':'#57606a'}">${isOverdue&&ist==='missing'?'⏰ Tamat: ':'Due: '}${item.due}</span>`:''}
+      </div>
+      ${subItemsHtml}
+    </div>`;
+  }).join('');
+
+  detailEl.innerHTML=`
+    <div class="stu-course-header">
+      <div class="sch-info"><h2>${course.code} – ${course.name}</h2><p>${sess} · ${LECTURERS.find(l=>l.id===course.lecturerId)?.name||''}</p></div>
+      <div class="sch-score">
+        <div class="sch-score-val">${ws.pct!=null?ws.pct.toFixed(1)+'%':'–'}</div>
+        <div class="sch-score-grade">Jumlah PB ${ws.pct!=null?'· Gred '+g?.grade:'· Belum lengkap'}</div>
+      </div>
+    </div>
+    <div class="sub-panel">
+      <div class="sub-panel-hdr"><div class="sub-panel-title">📋 Submission &amp; Markah Per Item PB</div>
+        <span style="font-size:10px;color:#57606a">${course.pbItems.length} item · Wajaran PB: ${course.pbItems.reduce((a,i)=>a+i.weight,0)}%</span>
+      </div>
+      ${pbHtml}
+    </div>`;
+}
+
+function backToCourseList(){
+  document.getElementById('stuCourseDetail').style.display='none';
+  document.getElementById('myCoursesGrid').style.display='';
+  renderStudentDash();
+}
+
+// ── Student upload ──
+function handleFile(e,sid,iid,siid){
+  const f=e.target.files[0]; if(!f) return;
+  if(f.size>10*1024*1024){toast('❌ Fail melebihi 10MB!','t-warn');return;}
+  const key=iid+'_'+siid;
+  pendingUploads[key]=f;
+  const z=document.getElementById(`uz-${iid}-${siid}`);
+  if(z){z.classList.add('hf');z.querySelector('.uz-icon').textContent='📎';z.querySelector('strong').textContent='Fail dipilih';const fn=document.getElementById(`fn-${iid}-${siid}`);if(fn)fn.textContent=f.name;}
+  const b=document.getElementById(`ubtn-${iid}-${siid}`);if(b)b.removeAttribute('disabled');
+}
+function submitUpload(sess,cid,sid,iid,siid){
+  const key=iid+'_'+siid;
+  const f=pendingUploads[key]; if(!f){toast('Sila pilih fail dahulu','t-warn');return;}
+  const course=db.courses[sess]?.[cid]; if(!course) return;
+  const item=course.pbItems.find(p=>p.id===iid);
+  const now=new Date().toISOString();
+  const late=isLate(item?.due,now);
+  if(!course.submissions[sid]) course.submissions[sid]={};
+  if(!course.submissions[sid][iid]) course.submissions[sid][iid]={};
+  course.submissions[sid][iid][siid]={status:late?'lat':'sub',note:late?'Hantar lewat':'',fileName:f.name,uploadedAt:now,score:null};
+  delete pendingUploads[key];
+  delete pendingResets[key];
+  toast(late?`⚠️ "${f.name}" dihantar LEWAT!`:`✅ "${f.name}" berjaya dihantar!`,late?'t-warn':'t-ok');
+  showStudentCourseDetail(sess,cid); buildLanding();
+}
+function startReup(sess,cid,sid,iid,siid){
+  const key=iid+'_'+siid;
+  const course=db.courses[sess]?.[cid]; if(!course) return;
+  if(!course.submissions[sid]) course.submissions[sid]={};
+  if(!course.submissions[sid][iid]) course.submissions[sid][iid]={};
+  pendingResets[key]={...(course.submissions[sid][iid][siid]||{})};
+  course.submissions[sid][iid][siid]={status:'missing',note:'',fileName:null,uploadedAt:null,score:null};
+  showStudentCourseDetail(sess,cid);
+}
+function cancelReup(sess,cid,sid,iid,siid){
+  const key=iid+'_'+siid;
+  if(pendingResets[key]){
+    const course=db.courses[sess]?.[cid];
+    if(course){
+      if(!course.submissions[sid]) course.submissions[sid]={};
+      if(!course.submissions[sid][iid]) course.submissions[sid][iid]={};
+      course.submissions[sid][iid][siid]=pendingResets[key];
+    }
+    delete pendingResets[key];
+  }
+  delete pendingUploads[key];
+  showStudentCourseDetail(sess,cid);
+}
+
+// ══════════════════════════════════════════════════════
+//  PER-STUDENT CQI MODAL (Pensyarah: klik nama pelajar)
+// ══════════════════════════════════════════════════════
+function openStuCqiModal(sid){
+  const course=getCourse(); if(!course) return;
+  const stu=course.students.find(s=>s.id===sid); if(!stu) return;
+  const subs=course.submissions[sid]||{};
+  const ws=studentWeightedScore(subs,course.pbItems);
+  const g=ws.pct!=null?getGrade(ws.pct):null;
+
+  document.getElementById('scqiTitle').textContent=`📊 Analisis Sub-Item — ${stu.name}`;
+  document.getElementById('scqiSub').textContent=`${sid} · ${course.code} ${course.name} · ${curSesi}${g?` · Gred ${g.grade} (${ws.pct.toFixed(1)}%)`:''}`;
+
+  const bodyHtml=course.pbItems.map(item=>{
+    const ip=itemPct(subs,item);
+    const ist=itemStatus(subs,item.id,item.subItems);
+    const istLbl={sub:'✅ Submitted',lat:'⚠️ Lewat',missing:'❌ Belum Hantar'}[ist]||'–';
+    const wScore=ip!=null?(ip/100)*item.weight:null;
+
+    const subRows=item.subItems.map(si=>{
+      const sub=subs[item.id]?.[si.id];
+      const score=sub?.score??null;
+      const pct=score!=null?(score/si.maxScore*100):null;
+      const col=pct==null?'#9ca3af':pct>=80?'#0e9f6e':pct>=60?'#f59e0b':'#ef4444';
+      const stChip=sub?.status?`<span class="chip ${sub.status}" style="font-size:9px;margin-right:4px">${{sub:'✅',lat:'⚠️',missing:'❌'}[sub.status]||''}</span>`:'<span class="chip mis" style="font-size:9px;margin-right:4px">❌</span>';
+      return `<div class="cqi-sub-row" style="margin-bottom:6px">
+        <span class="cqi-sub-name" title="${si.name}" style="min-width:120px">${stChip}${si.name}</span>
+        <div class="cqi-mini-bar" style="flex:1;min-width:60px"><div class="cqi-mini-fill" style="width:${pct??0}%;background:${col}"></div></div>
+        <span class="cqi-pct" style="color:${col};width:52px;text-align:right;flex-shrink:0">${score!=null?`${score}/${si.maxScore} (${pct.toFixed(0)}%)`:'–'}</span>
+      </div>`;
+    }).join('');
+
+    return `<div class="scqi-item">
+      <div class="scqi-item-hdr">
+        <div class="scqi-item-name">${item.name} <span style="font-size:10px;font-weight:400;color:#57606a">(${item.weight}%)</span></div>
+        <span class="chip ${ist}" style="font-size:10px">${istLbl}</span>
+        ${ip!=null?`<span class="markah-chip" style="font-size:10px">${ip.toFixed(1)}% ${gradeChip(ip)}</span>`:''}
+        ${wScore!=null?`<span style="font-size:10px;color:#57606a">Wajaran: <strong>${wScore.toFixed(2)}</strong>/${item.weight}</span>`:''}
+      </div>
+      ${subRows}
+    </div>`;
+  }).join('');
+
+  // Overall summary bar
+  const overallHtml=ws.pct!=null?`
+    <div style="background:#f7f8fa;border-radius:7px;padding:10px 14px;margin-bottom:14px;display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div style="text-align:center"><div style="font-size:22px;font-weight:700;color:${pc(ws.pct)}">${ws.pct.toFixed(1)}%</div><div style="font-size:10px;color:#57606a">Jumlah PB</div></div>
+      <div style="text-align:center">${gradeChip(ws.pct)}<div style="font-size:10px;color:#57606a;margin-top:2px">Gred</div></div>
+      <div style="text-align:center"><div style="font-size:18px;font-weight:700;color:#1a3a5c">${g?.gp.toFixed(2)}</div><div style="font-size:10px;color:#57606a">GP</div></div>
+    </div>`:'<div style="font-size:11px;color:#9ca3af;margin-bottom:12px;padding:8px;background:#f7f8fa;border-radius:6px">Markah belum diisi sepenuhnya.</div>';
+
+  document.getElementById('scqiBody').innerHTML=overallHtml+bodyHtml;
+  document.getElementById('scqiModal').classList.remove('hidden');
+}
+document.getElementById('scqiModal').addEventListener('click',e=>{if(e.target===document.getElementById('scqiModal'))document.getElementById('scqiModal').classList.add('hidden');});
+
+// ══════════════════════════════════════════════════════
+//  SETUP PAGE
+// ══════════════════════════════════════════════════════
+function renderSetup(){
+  const course=getCourse(); if(!course) return;
+  document.getElementById('setupCourseLabel').textContent=`${course.code} – ${course.name} · ${curSesi}`;
+  renderPbEditor(course); renderStuList(course);
+}
+function renderPbEditor(course){
+  document.getElementById('pbItemsEditor').innerHTML=course.pbItems.map((item,i)=>`
+    <div class="pb-item-block">
+      <div class="pb-item-hdr">
+        <input class="fi" value="${item.name}" onchange="course.pbItems[${i}].name=this.value;updWT(course)"/>
+        <input class="fi" type="number" value="${item.weight}" min="1" max="100" onchange="course.pbItems[${i}].weight=+this.value;updWT(course)" placeholder="%"/>
+        <input class="fi" type="date" value="${item.due||''}" onchange="course.pbItems[${i}].due=this.value"/>
+        <button class="btn btn-d btn-sm" onclick="rmPbItem(${i})">🗑</button>
+      </div>
+      <div class="pb-sub-list">
+        <div style="font-size:10px;font-weight:600;color:#57606a;margin-bottom:5px">Sub-item / Tugasan:</div>
+        ${item.subItems.map((si,j)=>`
+          <div class="pb-sub-row">
+            <input class="fi" value="${si.name}" onchange="course.pbItems[${i}].subItems[${j}].name=this.value" placeholder="Nama sub-item"/>
+            <input class="fi" type="number" value="${si.maxScore}" min="1" onchange="course.pbItems[${i}].subItems[${j}].maxScore=+this.value" placeholder="Markah"/>
+            <button class="btn btn-d btn-sm" onclick="rmSubItem(${i},${j})">✕</button>
+          </div>`).join('')}
+        <button class="add-sub-btn" onclick="addSubItem(${i})">＋ Tambah sub-item</button>
+      </div>
+    </div>`).join('');
+  updWT(course);
+}
+function updWT(course){const t=course.pbItems.reduce((a,i)=>a+i.weight,0);const el=document.getElementById('wtTotal');if(el){el.textContent=`Jumlah Wajaran: ${t}%`;el.className='wt-total '+(t===100?'wt-ok':t>100?'wt-err':'wt-warn');}}
+function addPbItem(){const course=getCourse();if(!course)return;course.pbItems.push({id:'pb'+Date.now(),name:'Item Baru',weight:10,due:'',subItems:[{id:'s'+Date.now(),name:'Sub-Item 1',maxScore:10}]});renderSetup();}
+function rmPbItem(i){const course=getCourse();if(!course)return;course.pbItems.splice(i,1);renderSetup();}
+function addSubItem(i){const course=getCourse();if(!course)return;course.pbItems[i].subItems.push({id:'s'+Date.now(),name:'Sub-Item Baru',maxScore:10});renderPbEditor(course);}
+function rmSubItem(i,j){const course=getCourse();if(!course)return;course.pbItems[i].subItems.splice(j,1);renderPbEditor(course);}
+function savePbItems(){const course=getCourse();if(!course)return;renderLecturerDash();toast('✅ Item PB disimpan!');}
+
+function renderStuList(course){
+  document.getElementById('stuListEdit').innerHTML=course.students.map((s,i)=>`
+    <div class="sl-row">
+      <input class="fi" value="${s.name}" onchange="course.students[${i}].name=this.value" style="font-size:11px"/>
+      <input class="fi" style="width:90px;font-size:11px" value="${s.id}" onchange="course.students[${i}].id=this.value"/>
+      <button class="btn btn-d btn-sm" onclick="rmStudent(${i})">🗑</button>
+    </div>`).join('');
+  document.getElementById('stuCount').textContent=`${course.students.length} pelajar berdaftar`;
+}
+function addStudent(){const course=getCourse();if(!course)return;const n=document.getElementById('newStuName').value.trim(),id=document.getElementById('newStuId').value.trim();if(!n||!id){alert('Sila isi nama dan no. matrik!');return;}course.students.push({id,name:n});if(!course.submissions[id])course.submissions[id]={};document.getElementById('newStuName').value='';document.getElementById('newStuId').value='';renderStuList(course);}
+function rmStudent(i){const course=getCourse();if(!course)return;course.students.splice(i,1);renderStuList(course);}
+
+function showAddCourseForm(){
+  const form=document.getElementById('addCourseForm');
+  form.style.display=form.style.display==='none'?'block':'none';
+  if(form.style.display==='block'){
+    const sel=document.getElementById('newCourseSession');
+    sel.innerHTML=SESSIONS.map(s=>`<option>${s}</option>`).join('');
+  }
+}
+function addNewCourse(){
+  const sess=document.getElementById('newCourseSession').value;
+  const code=document.getElementById('newCourseCode').value.trim();
+  const name=document.getElementById('newCourseName').value.trim();
+  if(!code||!name){alert('Sila isi kod dan nama kursus!');return;}
+  if(!db.courses[sess]) db.courses[sess]={};
+  const cid=code.toUpperCase();
+  db.courses[sess][cid]={code,name,lecturerId:currentUser.id,pbItems:[],students:[],submissions:{}};
+  document.getElementById('addCourseForm').style.display='none';
+  document.getElementById('newCourseCode').value='';
+  document.getElementById('newCourseName').value='';
+  curSesi=sess; curCourseId=cid;
+  buildSesiSelector(); buildCoursePills(); renderApp();
+  toast(`✅ Kursus ${code} ditambah!`);
+}
+
+// ══════════════════════════════════════════════════════
+//  PRINT
+// ══════════════════════════════════════════════════════
+let pOpts={st:true,al:true,gr:true,it:true};
+function openPrintModal(){document.getElementById('printModal').classList.remove('hidden');}
+function closePrintModal(){document.getElementById('printModal').classList.add('hidden');}
+function tglP(cb,k){pOpts[k]=cb.checked;document.getElementById('po-'+k).classList.toggle('sel',cb.checked);}
+function doPrint(){
+  closePrintModal();
+  const course=getCourse();
+  document.getElementById('phbTitle').textContent=`${course?.code||''} – ${course?.name||''} · ${curSesi}`;
+  document.getElementById('phbMeta').innerHTML=`<span><strong>Sesi:</strong> ${curSesi}</span><span><strong>Pensyarah:</strong> ${LECTURERS.find(l=>l.id===currentUser.id)?.name}</span><span><strong>Pelajar:</strong> ${course?.students.length}</span><span><strong>Tarikh:</strong> ${new Date().toLocaleDateString('ms-MY',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</span>`;
+  renderItemPage();
+  document.body.classList.toggle('pno-st',!pOpts.st);
+  document.body.classList.toggle('pno-al',!pOpts.al);
+  document.body.classList.toggle('pno-gr',!pOpts.gr);
+  document.body.classList.toggle('pno-it',!pOpts.it);
+  const pages=document.querySelectorAll('.apage'),wasActive=document.querySelector('.apage.active');
+  pages.forEach(p=>p.classList.add('active'));
+  setTimeout(()=>{window.print();setTimeout(()=>{pages.forEach(p=>p.classList.remove('active'));if(wasActive)wasActive.classList.add('active');document.body.classList.remove('pno-st','pno-al','pno-gr','pno-it');},1000);},200);
+}
+document.getElementById('printModal').addEventListener('click',e=>{if(e.target===document.getElementById('printModal'))closePrintModal();});
+
+// ══════════════════════════════════════════════════════
+//  TABS / FILTER / SEARCH
+// ══════════════════════════════════════════════════════
+function switchTab(name,el){
+  document.querySelectorAll('.apage').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+  const pageId='page'+name.charAt(0).toUpperCase()+name.slice(1);
+  document.getElementById(pageId).classList.add('active');
+  el.classList.add('active');
+  if(name==='items') renderItemPage();
+  if(name==='setup') renderSetup();
+}
+function setFilter(f,btn){activeFilter=f;document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const course=getCourse();if(course)renderGrid(course.pbItems,course.students,course.submissions);}
+function filterStudents(q){searchQuery=q;const course=getCourse();if(course)renderGrid(course.pbItems,course.students,course.submissions);}
+function resetAppTabs(){
+  document.querySelectorAll('.apage').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.atab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('pageDashboard').classList.add('active');
+  document.querySelector('.atab').classList.add('active');
+}
+
+// ── Role CSS ──
+const rs=document.createElement('style');
+rs.textContent=`body.role-student .lecturer-only{display:none!important}body.role-lecturer .student-only{display:none!important}`;
+document.head.appendChild(rs);
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+buildLanding();
+</script>
+</body>
+</html>
